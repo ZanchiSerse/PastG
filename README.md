@@ -47,31 +47,12 @@ Un gestionale che consente di calcolare ai pasticceri la quantità totale di bri
    - Risposte tempestive per le operazioni di ricerca (meno di 2 secondi).
    - Capacità di gestire almeno 10.000 clienti simultaneamente.
 
-3. **Sicurezza**
-   - Protezione delle informazioni personali degli utenti tramite crittografia.
-   - Autenticazione degli utenti tramite username e password sicure.
-   - Protezione contro attacchi comuni (SQL injection, XSS, ecc.).
-
-4. **Scalabilità**
+3. **Scalabilità**
    - Sistema progettato per supportare un incremento del numero di utenti e clienti senza degrado delle performance.
 
-5. **Affidabilità**
+4. **Affidabilità**
    - Alta disponibilità del sistema (99.9% di uptime).
    - Backup regolari del database per garantire la continuità dei dati.
 
-### Requisiti di Dominio
 
-1. **Normative**
-   - Conformità alle leggi sulla protezione dei dati (es. GDPR in Europa).
-   - Normative locali riguardanti la gestione delle informazioni sui clienti.
-
-2. **Settore**
-   - Applicabilità a specifici settori (es. vendite al dettaglio, e-commerce, ecc.).
-   - Integrazione con sistemi di gestione esistenti nel settore.
-
-3. **Terminologia**
-   - Utilizzo di termini e definizioni riconosciuti nel dominio di applicazione (es. "cliente", "prodotto", "ordine", ecc.).
-
-4. **Stakeholder**
-   - Identificazione dei principali attori coinvolti (es. amministratori, utenti finali, manager).
-   - Raccolta di requisiti specifici da parte degli stakeholder per personalizzazioni o funzionalità aggiuntive.
+![Diagramma UML](https://yuml.me/pastg/56d860f0.svg)
