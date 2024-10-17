@@ -69,5 +69,3 @@ Un gestionale che consente di calcolare ai pasticceri la quantità totale di bri
 4. **Stakeholder**
    - Identificazione dei principali attori coinvolti (es. amministratori, utenti finali, manager).
    - Raccolta di requisiti specifici da parte degli stakeholder per personalizzazioni o funzionalità aggiuntive.
-
-Se hai bisogno di ulteriori dettagli o chiarimenti su specifici requisiti, fammelo sapere!
