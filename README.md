@@ -4,6 +4,9 @@ Un gestionale che consente di calcolare ai pasticceri la quantità totale di bri
 ### Target
 Pasticcerie, artigiani del settore dolciario e fornai, piccoli laboratori di produzione dolciaria.
 
+### Problema
+Questo gestionale è progettato per supportare i pasticceri nel calcolo rapido e accurato della quantità totale di brioches da preparare. Senza l'ausilio di questo strumento, il processo di calcolo risulterebbe molto più lungo e laborioso.
+
 ### Competitor
 Danea Easyfatt
 
@@ -19,7 +22,7 @@ Danea Easyfatt
 
 -Calcolo dei prodotti: Modulo per il calcolo del numero e del valore dei prodotti associati a ciascun cliente.
 
-ù-Database prodotti per cliente: Archiviazione e gestione di un elenco dettagliato dei prodotti acquistati o associati a ciascun cliente.
+-Database prodotti per cliente: Archiviazione e gestione di un elenco dettagliato dei prodotti acquistati o associati a ciascun cliente.
 
 ### Requisiti Funzionali
 
@@ -48,18 +51,13 @@ Danea Easyfatt
 
 1. **Usabilità**
    - Interfaccia utente intuitiva e facile da navigare.
+   - Interfaccia user-friendly per un rapido aggiornamento dei dati.
 
-2. **Performance**
-   - Risposte tempestive per le operazioni di ricerca (meno di 2 secondi).
-   - Capacità di gestire almeno 10.000 clienti simultaneamente.
+2. **Scalabilità**
+   - Sistema progettato per supportare un incremento del numero di utenti e clienti.
+   - Precisione nel calcolo e gestione degli arrotondamenti
 
-3. **Scalabilità**
-   - Sistema progettato per supportare un incremento del numero di utenti e clienti senza degrado delle performance.
+3. **Affidabilità**
+   - Rispetto delle normative sulla privacy e protezione dei dati personali (es. GDPR).
 
-4. **Affidabilità**
-   - Alta disponibilità del sistema (99.9% di uptime).
-   - Backup regolari del database per garantire la continuità dei dati.
-
-
-Gestione di informazioni dettagliate sui prodotti, comprese descrizione, prezzo e disponibilità.
-![Diagramma UML](https://yuml.me/pastg/56d860f0.svg)
+![Diagram](https://yuml.me/pastg/PASTg.svg)
