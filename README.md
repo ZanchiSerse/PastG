@@ -4,11 +4,16 @@ Un gestionale che consente di calcolare ai pasticceri la quantità totale di bri
 ### Raccolta dei requisiti
 
 -Gestione dei profili utente: Funzionalità per la creazione, modifica e gestione dei profili degli utenti.
+
 -Registrazione utenti: Processo di iscrizione per nuovi utenti con raccolta delle informazioni personali necessarie.
+
 -Gestione del database clienti: Sistema di archiviazione e gestione delle informazioni sui clienti, con possibilità di visualizzare, aggiungere, modificare o eliminare.
+
 -Funzionalità di ricerca clienti: Strumento per la ricerca rapida e avanzata dei clienti, basata su criteri specifici .
+
 -Calcolo dei prodotti: Modulo per il calcolo del numero e del valore dei prodotti associati a ciascun cliente.
--Database prodotti per cliente: Archiviazione e gestione di un elenco dettagliato dei prodotti acquistati o associati a ciascun cliente.
+
+ù-Database prodotti per cliente: Archiviazione e gestione di un elenco dettagliato dei prodotti acquistati o associati a ciascun cliente.
 
 ### Requisiti Funzionali
 
