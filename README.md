@@ -1,6 +1,12 @@
 # PastG
 Un gestionale che consente di calcolare ai pasticceri la quantità totale di brioches da produrre per i clienti, i quali mandano l'ordine al pasticcere ed esso elabora il conto totale delle brioches.
 
+### Target
+Pasticcerie, artigiani del settore dolciario e fornai, piccoli laboratori di produzione dolciaria.
+
+### Competitor
+Danea Easyfatt
+
 ### Raccolta dei requisiti
 
 -Gestione dei profili utente: Funzionalità per la creazione, modifica e gestione dei profili degli utenti.
