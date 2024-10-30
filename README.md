@@ -60,4 +60,6 @@ Danea Easyfatt
 3. **Affidabilità**
    - Rispetto delle normative sulla privacy e protezione dei dati personali (es. GDPR).
 
+
+
 ![Diagram](https://yuml.me/pastg/PASTg.svg)
