@@ -1,0 +1,200 @@
+/* Reset e impostazioni di base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Stile generale del body */
+body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #d7ccc8, #8d6e63);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    padding: 50px 0; /* Spazio superiore e inferiore aumentato */
+}
+
+/* Contenitore principale */
+.container {
+    text-align: center;
+    width: 100%;
+    max-width: 500px;
+    padding: 40px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+    margin: 50px auto;
+    overflow: hidden;
+}
+
+/* Titoli */
+h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+}
+
+h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    font-weight: 500;
+}
+
+.highlight {
+    color: #795548;
+}
+
+/* Stile per il wrapper dei form */
+.form-wrapper {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+/* Contenitore dei form */
+.form-container {
+    background-color: rgba(255, 255, 255, 0.2);
+    padding: 30px;
+    border-radius: 12px;
+    width: 100%;
+    max-width: 350px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
+    margin-bottom: 0;
+}
+
+/* Specifico per la pagina di registrazione */
+#register-container.active {
+    padding-top: 60px;  /* Aumenta il padding sopra */
+    padding-bottom: 60px;  /* Aumenta il padding sotto */
+}
+
+/* Input fields */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"] {
+    width: 100%;
+    padding: 15px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
+    transition: box-shadow 0.3s ease;
+}
+
+input:focus {
+    box-shadow: 0 0 5px rgba(125, 125, 125, 0.5);
+    outline: none;
+}
+
+input::placeholder {
+    color: #555;
+    font-weight: 400;
+}
+
+/* Pulsanti */
+button {
+    width: 100%;
+    padding: 15px;
+    font-size: 1.1rem;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    margin-top: 15px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-primary {
+    background-color: #5d4037;
+    color: #fff;
+    font-weight: 600;
+}
+
+.btn-primary:hover {
+    background-color: #4e342e;
+    transform: scale(1.05);
+}
+
+.btn-secondary {
+    background-color: #8d6e63;
+    color: #fff;
+    font-weight: 600;
+}
+
+.btn-secondary:hover {
+    background-color: #795548;
+    transform: scale(1.05);
+}
+
+/* Messaggio di errore */
+#message {
+    margin-top: 20px;
+    font-size: 1rem;
+}
+
+/* Media queries */
+@media (max-width: 768px) {
+    .form-wrapper {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .form-container {
+        max-width: 100%;
+    }
+}
+
+/* Stile per il toggle dei form */
+.toggle-buttons {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.toggle-buttons button {
+    padding: 12px 20px;
+    font-size: 1rem;
+    cursor: pointer;
+    border: none;
+    border-radius: 10px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+/* Stile per i contenitori di login e registrazione */
+#register-container, #login-container {
+    transition: all 0.3s ease-in-out;
+    display: none;
+    height: auto;
+    margin-bottom: 0;
+}
+
+#register-container.active, #login-container.active {
+    display: block;
+}
+
+/* Aggiunta di stili per i wrapper degli input */
+.input-wrapper {
+    position: relative;
+    margin-bottom: 15px;
+}
+
+.input-wrapper i {
+    position: absolute;
+    left: 10px;
+    top: 12px;
+    color: #888;
+}
+
+.input-wrapper input {
+    width: 100%;
+    padding: 10px 35px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
