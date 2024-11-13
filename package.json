@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "body-parser": "^1.20.3",
+    "swagger": "^0.0.1",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1"
+  }
+}

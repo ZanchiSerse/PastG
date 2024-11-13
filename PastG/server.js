@@ -1,12 +1,32 @@
-const express = require('express');
+const express = require('express'); 
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
+const swaggerJsdoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
+
 const app = express();
 const port = 3000;
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
+// Configurazione Swagger
+const swaggerOptions = {
+    definition: {
+        openapi: '3.0.0',
+        info: {
+            title: 'API di esempio',
+            version: '1.0.0',
+            description: 'API per registrazione e login utenti',
+        },
+    },
+    apis: ['./app.js'], // Specifica il file per estrarre i commenti
+};
+
+const swaggerDocs = swaggerJsdoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
+// Connessione al database SQLite
 let db = new sqlite3.Database('./database.db', (err) => {
     if (err) {
         return console.error(err.message);
@@ -24,24 +44,45 @@ db.run(`CREATE TABLE IF NOT EXISTS utenti (
     telefono TEXT NOT NULL UNIQUE
 )`);
 
-// Registrazione utente
+/**
+ * @swagger
+ * /register:
+ *   post:
+ *     summary: Registra un nuovo utente
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               nome:
+ *                 type: string
+ *               residenza:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               telefono:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Registrazione avvenuta con successo
+ *       400:
+ *         description: Errore nei dati forniti
+ */
 app.post('/register', (req, res) => {
-    const { nome, residenza, email, password,  telefono } = req.body;
+    const { nome, residenza, email, password, telefono } = req.body;
 
-    // Verifica che tutti i campi siano presenti
     if (!nome || !residenza || !email || !password || !telefono) {
         return res.status(400).json({ error: "Tutti i campi sono obbligatori" });
     }
 
-    // Controllo che la password sia uguale a conferma password
-    
-
-    // Controllo che la password abbia almeno 6 caratteri
     if (password.length < 6) {
         return res.status(400).json({ error: "La password deve avere almeno 6 caratteri" });
     }
 
-    // Verifica se l'email o il telefono sono già presenti
     db.get(`SELECT * FROM utenti WHERE email = ? OR telefono = ?`, [email, telefono], (err, row) => {
         if (err) {
             return res.status(500).json({ error: err.message });
@@ -50,7 +91,6 @@ app.post('/register', (req, res) => {
             return res.status(400).json({ error: "Email o telefono già registrati" });
         }
 
-        // Inserimento utente nel database
         db.run(`INSERT INTO utenti (nome, residenza, email, password, telefono) VALUES (?, ?, ?, ?, ?)`,
             [nome, residenza, email, password, telefono],
             function (err) {
@@ -63,16 +103,35 @@ app.post('/register', (req, res) => {
     });
 });
 
-// Login utente
+/**
+ * @swagger
+ * /login:
+ *   post:
+ *     summary: Effettua il login di un utente
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Login effettuato con successo
+ *       400:
+ *         description: Errore nei dati di login
+ */
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
 
-    // Verifica che tutti i campi siano presenti
     if (!email || !password) {
         return res.status(400).json({ error: "Email e password sono obbligatorie" });
     }
 
-    // Cerca l'utente nel database
     db.get(`SELECT * FROM utenti WHERE email = ?`, [email], (err, user) => {
         if (err) {
             return res.status(500).json({ error: err.message });
@@ -81,7 +140,6 @@ app.post('/login', (req, res) => {
             return res.status(400).json({ error: "Utente non trovato" });
         }
 
-        // Verifica che la password sia corretta
         if (user.password !== password) {
             return res.status(400).json({ error: "Password errata" });
         }
@@ -90,7 +148,6 @@ app.post('/login', (req, res) => {
     });
 });
 
-// Chiusura del database al termine del processo
 process.on('SIGINT', () => {
     db.close((err) => {
         if (err) {
@@ -103,4 +160,5 @@ process.on('SIGINT', () => {
 
 app.listen(port, () => {
     console.log(`Server in esecuzione su http://localhost:${port}`);
+    console.log(`Documentazione Swagger disponibile su http://localhost:${port}/api-docs`);
 });
