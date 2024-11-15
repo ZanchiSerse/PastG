@@ -118,24 +118,23 @@
         // Funzione per caricare gli utenti ordinati
         function loadUsersOrdered() {
             const order = document.getElementById('orderSelect').value;
-            let url = '/users/ordered'; // Default URL for ordered users
-
-            // Chiamata AJAX per ottenere gli utenti ordinati
-            fetch(url)
-                .then(response => response.json())
-                .then(users => {
-                    displayUsers(users); // Passa i dati degli utenti alla funzione di visualizzazione
-                })
-                .catch(error => {
-                    console.error('Errore nel caricamento utenti:', error);
-                    alert('Errore nel caricamento utenti');
-                });
+            const xhr = new XMLHttpRequest();
+            xhr.open("GET", `/users/ordered?order=${order}`, true);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    const users = JSON.parse(xhr.responseText);
+                    displayUsers(users);
+                } else if (xhr.readyState === 4) {
+                    alert("Errore nel caricamento utenti");
+                }
+            };
+            xhr.send();
         }
 
         // Funzione per visualizzare gli utenti nella pagina
         function displayUsers(users) {
             const container = document.getElementById('displayContainer');
-            container.innerHTML = '';  // Pulisce il contenitore prima di aggiungere nuovi dati
+            container.innerHTML = ''; // Pulisce il contenitore
 
             if (users.length === 0) {
                 container.innerHTML = '<p>Nessun utente trovato.</p>';
@@ -158,36 +157,39 @@
         // Funzione per filtrare gli utenti per nome
         function filterUsersByName() {
             const query = document.getElementById('searchBar').value.toLowerCase();
-
-            fetch('/users/ordered')
-                .then(response => response.json())
-                .then(users => {
+            const xhr = new XMLHttpRequest();
+            xhr.open("GET", "/users/ordered", true);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    const users = JSON.parse(xhr.responseText);
                     const filteredUsers = users.filter(user => user.nome.toLowerCase().includes(query));
-                    displayUsers(filteredUsers); // Visualizza gli utenti filtrati
-                })
-                .catch(error => {
-                    console.error('Errore nel caricamento utenti:', error);
-                    alert('Errore nel caricamento utenti');
-                });
+                    displayUsers(filteredUsers);
+                } else if (xhr.readyState === 4) {
+                    alert("Errore nel caricamento utenti");
+                }
+            };
+            xhr.send();
         }
 
         // Funzione per caricare tutti i prodotti
         function loadProducts() {
-            fetch('/products')  // Chiamata AJAX per ottenere i prodotti
-                .then(response => response.json())
-                .then(products => {
-                    displayProducts(products);  // Visualizza i prodotti
-                })
-                .catch(error => {
-                    console.error('Errore nel caricamento prodotti:', error);
-                    alert('Errore nel caricamento prodotti');
-                });
+            const xhr = new XMLHttpRequest();
+            xhr.open("GET", "/products", true);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    const products = JSON.parse(xhr.responseText);
+                    displayProducts(products);
+                } else if (xhr.readyState === 4) {
+                    alert("Errore nel caricamento prodotti");
+                }
+            };
+            xhr.send();
         }
 
         // Funzione per visualizzare i prodotti
         function displayProducts(products) {
             const container = document.getElementById('productsContainer');
-            container.innerHTML = '';  // Pulisce il contenitore prima di aggiungere nuovi dati
+            container.innerHTML = ''; // Pulisce il contenitore
 
             if (products.length === 0) {
                 container.innerHTML = '<p>Nessun prodotto trovato.</p>';
@@ -206,7 +208,7 @@
         }
 
         // Carica gli utenti ordinati al caricamento della pagina
-        loadUsersOrdered();  
+        loadUsersOrdered();
     </script>
 </body>
 </html>
