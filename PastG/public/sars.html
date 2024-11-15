@@ -3,66 +3,210 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dati Utente - PartiG</title>
+    <title>Utenti e Prodotti</title>
     <style>
         body {
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(135deg, #c4a484, #8b6f47);
             color: #333;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
             margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        .user-info {
-            text-align: center;
-            background-color: rgba(255, 255, 255, 0.8);
+        .filters {
+            width: 90%;
+            max-width: 1200px;
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .filters select,
+        .filters input[type="text"] {
+            padding: 10px;
+            font-size: 1rem;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            margin-right: 10px;
+        }
+
+        .filters button {
+            background-color: #8b6f47;
+            color: white;
+            font-size: 1rem;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .filters button:hover {
+            background-color: #6f4e37;
+        }
+
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            width: 90%;
+            max-width: 1200px;
             padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
         }
 
-        h1 {
-            font-size: 2rem;
-            margin-bottom: 1rem;
+        .card {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h3 {
+            font-size: 1.5rem;
             color: #6f4e37;
+            margin-bottom: 10px;
         }
 
-        p {
-            font-size: 1.2rem;
-            margin: 10px 0;
+        .card p {
+            font-size: 1rem;
+            margin: 5px 0;
         }
 
-        .highlight {
-            color: #8b6f47;
-            font-weight: 600;
+        .card .btn {
+            background-color: #8b6f47;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .card .btn:hover {
+            background-color: #6f4e37;
         }
     </style>
 </head>
 <body>
 
-    <div class="user-info">
-        <h1>Benvenuto su PastG</h1>
-        <p><span class="highlight">Nome:</span> <span id="nome"></span></p>
-        <p><span class="highlight">Email:</span> <span id="email"></span></p>
-        <p><span class="highlight">Telefono:</span> <span id="telefono"></span></p>
+    <div class="filters">
+        <select id="orderSelect" onchange="loadUsersOrdered()">
+            <option value="alphabetical">Ordina per nome</option>
+            <option value="default">Ordine Predefinito</option>
+        </select>
+        <input type="text" id="searchBar" placeholder="Cerca utente..." onkeyup="filterUsersByName()">
+        <button onclick="loadProducts()">Mostra Prodotti</button>
     </div>
 
+    <div id="displayContainer" class="card-container"></div>
+    <div id="productsContainer" class="card-container"></div>
+
     <script>
-        // Recupera i dati dell'utente dal localStorage
-        const user = JSON.parse(localStorage.getItem('user'));
+        // Funzione per caricare gli utenti ordinati
+        function loadUsersOrdered() {
+            const order = document.getElementById('orderSelect').value;
+            let url = '/users/ordered'; // Default URL for ordered users
 
-        if (user) {
-            document.getElementById('nome').innerText = user.nome || 'N/A';
-            document.getElementById('email').innerText = user.email || 'N/A';
-            document.getElementById('telefono').innerText = user.telefono || 'N/A';
-        } else {
-            // Se non ci sono dati nel localStorage, mostra un messaggio di errore
-            document.body.innerHTML = '<h1>Errore: Nessun dato utente trovato!</h1>';
+            // Chiamata AJAX per ottenere gli utenti ordinati
+            fetch(url)
+                .then(response => response.json())
+                .then(users => {
+                    displayUsers(users); // Passa i dati degli utenti alla funzione di visualizzazione
+                })
+                .catch(error => {
+                    console.error('Errore nel caricamento utenti:', error);
+                    alert('Errore nel caricamento utenti');
+                });
         }
-    </script>
 
+        // Funzione per visualizzare gli utenti nella pagina
+        function displayUsers(users) {
+            const container = document.getElementById('displayContainer');
+            container.innerHTML = '';  // Pulisce il contenitore prima di aggiungere nuovi dati
+
+            if (users.length === 0) {
+                container.innerHTML = '<p>Nessun utente trovato.</p>';
+            } else {
+                users.forEach(user => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <h3>${user.nome}</h3>
+                        <p>Email: ${user.email}</p>
+                        <p>Telefono: ${user.telefono}</p>
+                        <br>
+                        <a href="/user-details/${user.id}" class="btn">Vedi Dettagli</a>
+                    `;
+                    container.appendChild(card);
+                });
+            }
+        }
+
+        // Funzione per filtrare gli utenti per nome
+        function filterUsersByName() {
+            const query = document.getElementById('searchBar').value.toLowerCase();
+
+            fetch('/users/ordered')
+                .then(response => response.json())
+                .then(users => {
+                    const filteredUsers = users.filter(user => user.nome.toLowerCase().includes(query));
+                    displayUsers(filteredUsers); // Visualizza gli utenti filtrati
+                })
+                .catch(error => {
+                    console.error('Errore nel caricamento utenti:', error);
+                    alert('Errore nel caricamento utenti');
+                });
+        }
+
+        // Funzione per caricare tutti i prodotti
+        function loadProducts() {
+            fetch('/products')  // Chiamata AJAX per ottenere i prodotti
+                .then(response => response.json())
+                .then(products => {
+                    displayProducts(products);  // Visualizza i prodotti
+                })
+                .catch(error => {
+                    console.error('Errore nel caricamento prodotti:', error);
+                    alert('Errore nel caricamento prodotti');
+                });
+        }
+
+        // Funzione per visualizzare i prodotti
+        function displayProducts(products) {
+            const container = document.getElementById('productsContainer');
+            container.innerHTML = '';  // Pulisce il contenitore prima di aggiungere nuovi dati
+
+            if (products.length === 0) {
+                container.innerHTML = '<p>Nessun prodotto trovato.</p>';
+            } else {
+                products.forEach(product => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <h3>${product.nome}</h3>
+                        <p>${product.descrizione}</p>
+                        <p>Prezzo: €${product.prezzo}</p>
+                    `;
+                    container.appendChild(card);
+                });
+            }
+        }
+
+        // Carica gli utenti ordinati al caricamento della pagina
+        loadUsersOrdered();  
+    </script>
 </body>
 </html>

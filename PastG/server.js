@@ -1,8 +1,6 @@
 const express = require('express'); 
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
-const swaggerJsdoc = require('swagger-jsdoc');
-const swaggerUi = require('swagger-ui-express');
 
 const app = express();
 const port = 3000;
@@ -10,7 +8,10 @@ const port = 3000;
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
-// Configurazione Swagger
+const swaggerJsdoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
+
+// Configurazione di Swagger
 const swaggerOptions = {
     definition: {
         openapi: '3.0.0',
@@ -20,11 +21,12 @@ const swaggerOptions = {
             description: 'API per registrazione e login utenti',
         },
     },
-    apis: ['./app.js'], // Specifica il file per estrarre i commenti
+    apis: ['./server.js'], // Percorso al file che contiene i commenti Swagger (in questo caso server.js)
 };
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
 
 // Connessione al database SQLite
 let db = new sqlite3.Database('./database.db', (err) => {
@@ -92,6 +94,7 @@ app.post('/register', (req, res) => {
         }
 
         db.run(`INSERT INTO utenti (nome, residenza, email, password, telefono) VALUES (?, ?, ?, ?, ?)`,
+
             [nome, residenza, email, password, telefono],
             function (err) {
                 if (err) {
@@ -148,6 +151,73 @@ app.post('/login', (req, res) => {
     });
 });
 
+/**
+ * @swagger
+ * /users/ordered:
+ *   get:
+ *     summary: Recupera la lista di utenti ordinata alfabeticamente
+ *     responses:
+ *       200:
+ *         description: Lista degli utenti ordinata con successo
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                   nome:
+ *                     type: string
+ *                   email:
+ *                     type: string
+ *                   telefono:
+ *                     type: string
+ */
+app.get('/users/ordered', (req, res) => {
+    db.all(`SELECT id, nome, email, telefono FROM utenti ORDER BY nome ASC`, [], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.json(rows); // Restituisce gli utenti ordinati
+    });
+});
+
+/**
+ * @swagger
+ * /products:
+ *   get:
+ *     summary: Recupera la lista di tutti i prodotti
+ *     responses:
+ *       200:
+ *         description: Lista dei prodotti recuperata con successo
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                   nome:
+ *                     type: string
+ *                   descrizione:
+ *                     type: string
+ *                   prezzo:
+ *                     type: number
+ */
+app.get('/products', (req, res) => {
+    db.all(`SELECT id, nome, descrizione, prezzo FROM prodotti`, [], (err, rows) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        res.json(rows);
+    });
+});
+
+// Gestione della chiusura del database
 process.on('SIGINT', () => {
     db.close((err) => {
         if (err) {
@@ -158,6 +228,15 @@ process.on('SIGINT', () => {
     });
 });
 
+// Creazione della tabella prodotti (se non esiste già)
+db.run(`CREATE TABLE IF NOT EXISTS prodotti (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nome TEXT NOT NULL,
+    descrizione TEXT,
+    prezzo REAL NOT NULL
+)`);
+
+// Avvio del server
 app.listen(port, () => {
     console.log(`Server in esecuzione su http://localhost:${port}`);
     console.log(`Documentazione Swagger disponibile su http://localhost:${port}/api-docs`);
