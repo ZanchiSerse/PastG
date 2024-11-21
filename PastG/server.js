@@ -1,15 +1,14 @@
-const express = require('express'); 
+const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
+const swaggerJsdoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
 
 const app = express();
 const port = 3000;
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
-
-const swaggerJsdoc = require('swagger-jsdoc');
-const swaggerUi = require('swagger-ui-express');
 
 // Configurazione di Swagger
 const swaggerOptions = {
@@ -18,20 +17,19 @@ const swaggerOptions = {
         info: {
             title: 'API di esempio',
             version: '1.0.0',
-            description: 'API per registrazione e login utenti',
+            description: 'API per registrazione e gestione di utenti e clienti',
         },
     },
-    apis: ['./server.js'], // Percorso al file che contiene i commenti Swagger (in questo caso server.js)
+    apis: ['./server.js'], // Percorso al file che contiene i commenti Swagger
 };
 
 const swaggerDocs = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 
-
 // Connessione al database SQLite
 let db = new sqlite3.Database('./database.db', (err) => {
     if (err) {
-        return console.error(err.message);
+        return console.error('Errore di connessione al database:', err.message);
     }
     console.log('Connesso al database SQLite.');
 });
@@ -45,6 +43,21 @@ db.run(`CREATE TABLE IF NOT EXISTS utenti (
     password TEXT NOT NULL,
     telefono TEXT NOT NULL UNIQUE
 )`);
+
+// Creazione tabella clienti
+db.run(`CREATE TABLE IF NOT EXISTS clienti (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nomecliente TEXT NOT NULL UNIQUE
+)`);
+
+// Inserimento clienti iniziali
+db.run(`INSERT OR IGNORE INTO clienti (nomecliente) VALUES (?), (?)`, ['Savoy', 'Elia'], function (err) {
+    if (err) {
+        console.error('Errore nell\'inserimento dei clienti iniziali:', err.message);
+    } else {
+        console.log('Clienti iniziali inseriti con successo (o già esistenti).');
+    }
+});
 
 /**
  * @swagger
@@ -94,7 +107,6 @@ app.post('/register', (req, res) => {
         }
 
         db.run(`INSERT INTO utenti (nome, residenza, email, password, telefono) VALUES (?, ?, ?, ?, ?)`,
-
             [nome, residenza, email, password, telefono],
             function (err) {
                 if (err) {
@@ -178,20 +190,22 @@ app.post('/login', (req, res) => {
 app.get('/users/ordered', (req, res) => {
     db.all(`SELECT id, nome, email, telefono FROM utenti ORDER BY nome ASC`, [], (err, rows) => {
         if (err) {
+            console.error('Errore nella ricerca degli utenti:', err.message); // Log dell'errore
             return res.status(500).json({ error: err.message });
         }
-        res.json(rows); // Restituisce gli utenti ordinati
+        console.log('Utenti trovati:', rows); // Log dei dati recuperati
+        res.json(rows);
     });
 });
 
 /**
  * @swagger
- * /products:
+ * /clients/ordered:
  *   get:
- *     summary: Recupera la lista di tutti i prodotti
+ *     summary: Recupera la lista di clienti ordinata alfabeticamente
  *     responses:
  *       200:
- *         description: Lista dei prodotti recuperata con successo
+ *         description: Lista dei clienti recuperata con successo
  *         content:
  *           application/json:
  *             schema:
@@ -201,19 +215,59 @@ app.get('/users/ordered', (req, res) => {
  *                 properties:
  *                   id:
  *                     type: integer
- *                   nome:
+ *                   nomecliente:
  *                     type: string
- *                   descrizione:
- *                     type: string
- *                   prezzo:
- *                     type: number
  */
-app.get('/products', (req, res) => {
-    db.all(`SELECT id, nome, descrizione, prezzo FROM prodotti`, [], (err, rows) => {
+app.get('/clients/ordered', (req, res) => {
+    db.all(`SELECT id, nomecliente FROM clienti ORDER BY nomecliente ASC`, [], (err, rows) => {
         if (err) {
+            console.error('Errore nella ricerca dei clienti:', err.message); // Log dell'errore
             return res.status(500).json({ error: err.message });
         }
+
+        if (rows.length === 0) {
+            console.log('Nessun cliente trovato nel database.'); // Se la tabella è vuota
+        } else {
+            console.log('Clienti trovati:', rows); // Log dei clienti trovati
+        }
+
         res.json(rows);
+    });
+});
+
+/**
+ * @swagger
+ * /clients/add:
+ *   post:
+ *     summary: Aggiunge un nuovo cliente al database
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               nomecliente:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Cliente aggiunto con successo
+ *       400:
+ *         description: Errore nei dati forniti
+ */
+app.post('/clients/add', (req, res) => {
+    const { nomecliente } = req.body;
+
+    if (!nomecliente) {
+        return res.status(400).json({ error: "Il campo 'nomecliente' è obbligatorio" });
+    }
+
+    db.run(`INSERT INTO clienti (nomecliente) VALUES (?)`, [nomecliente], function (err) {
+        if (err) {
+            console.error('Errore nell\'aggiungere il cliente:', err.message); // Log dell'errore
+            return res.status(500).json({ error: err.message });
+        }
+        res.json({ message: 'Cliente aggiunto con successo', id: this.lastID });
     });
 });
 
@@ -221,20 +275,12 @@ app.get('/products', (req, res) => {
 process.on('SIGINT', () => {
     db.close((err) => {
         if (err) {
-            console.error(err.message);
+            console.error('Errore nella chiusura del database:', err.message);
         }
         console.log('Chiusura del database.');
         process.exit(0);
     });
 });
-
-// Creazione della tabella prodotti (se non esiste già)
-db.run(`CREATE TABLE IF NOT EXISTS prodotti (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    nome TEXT NOT NULL,
-    descrizione TEXT,
-    prezzo REAL NOT NULL
-)`);
 
 // Avvio del server
 app.listen(port, () => {
