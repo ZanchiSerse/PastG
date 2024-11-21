@@ -1,5 +1,5 @@
 # PastG
-Un gestionale che consente di calcolare ai pasticceri la quantità totale di brioches da produrre per i clienti, i quali mandano l'ordine al pasticcere ed esso elabora il conto totale delle brioches.
+Un gestionale che consente di calcolare ai pasticceri la quantità totale di brioches e di altri prodotti da produrre per i clienti, i quali mandano l'ordine al pasticcere ed esso elabora il conto totale delle brioches.
 
 ### Target
 Pasticcerie, artigiani del settore dolciario e fornai, piccoli laboratori di produzione dolciaria.
@@ -10,7 +10,7 @@ Questo gestionale è progettato per supportare i pasticceri nel calcolo rapido e
 ### Competitor
 Danea Easyfatt
 
-### Raccolta dei requisiti
+### Raccolta dei requisiti di dominio
 
 -Gestione dei profili utente: Funzionalità per la creazione, modifica e gestione dei profili degli utenti.
 
@@ -57,8 +57,6 @@ Danea Easyfatt
    - Sistema progettato per supportare un incremento del numero di utenti e clienti.
    - Precisione nel calcolo e gestione degli arrotondamenti
 
-3. **Affidabilità**
-   - Rispetto delle normative sulla privacy e protezione dei dati personali (es. GDPR).
 
 
 
