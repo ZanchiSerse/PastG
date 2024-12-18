@@ -1,38 +1,32 @@
 const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
-const swaggerJsdoc = require('swagger-jsdoc');
-const swaggerUi = require('swagger-ui-express');
-
+const bcrypt = require('bcrypt');
 const app = express();
 const port = 3000;
+const cors = require('cors');
+app.use(cors());
+const corsOptions = {
+    origin: 'http://localhost:3000', // Configura l'origine del client
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type'],
+};
+app.use(cors(corsOptions));
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
-// Configurazione di Swagger
-const swaggerOptions = {
-    definition: {
-        openapi: '3.0.0',
-        info: {
-            title: 'API di esempio',
-            version: '1.0.0',
-            description: 'API per registrazione e gestione di utenti e clienti',
-        },
-    },
-    apis: ['./server.js'], // Percorso al file che contiene i commenti Swagger
-};
 
-const swaggerDocs = swaggerJsdoc(swaggerOptions);
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
 
 // Connessione al database SQLite
-let db = new sqlite3.Database('./database.db', (err) => {
+let db = new sqlite3.Database(path.join(__dirname, 'database.db'), (err) => {
     if (err) {
         return console.error('Errore di connessione al database:', err.message);
     }
     console.log('Connesso al database SQLite.');
 });
+
 
 // Creazione tabella utenti
 db.run(`CREATE TABLE IF NOT EXISTS utenti (
@@ -46,47 +40,10 @@ db.run(`CREATE TABLE IF NOT EXISTS utenti (
 
 // Creazione tabella clienti
 db.run(`CREATE TABLE IF NOT EXISTS clienti (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    idclienti INTEGER PRIMARY KEY AUTOINCREMENT,
     nomecliente TEXT NOT NULL UNIQUE
 )`);
 
-// Inserimento clienti iniziali
-db.run(`INSERT OR IGNORE INTO clienti (nomecliente) VALUES (?), (?)`, ['Savoy', 'Elia'], function (err) {
-    if (err) {
-        console.error('Errore nell\'inserimento dei clienti iniziali:', err.message);
-    } else {
-        console.log('Clienti iniziali inseriti con successo (o già esistenti).');
-    }
-});
-
-/**
- * @swagger
- * /register:
- *   post:
- *     summary: Registra un nuovo utente
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               nome:
- *                 type: string
- *               residenza:
- *                 type: string
- *               email:
- *                 type: string
- *               password:
- *                 type: string
- *               telefono:
- *                 type: string
- *     responses:
- *       200:
- *         description: Registrazione avvenuta con successo
- *       400:
- *         description: Errore nei dati forniti
- */
 app.post('/register', (req, res) => {
     const { nome, residenza, email, password, telefono } = req.body;
 
@@ -98,95 +55,117 @@ app.post('/register', (req, res) => {
         return res.status(400).json({ error: "La password deve avere almeno 6 caratteri" });
     }
 
+    // Verifica esistenza utente
     db.get(`SELECT * FROM utenti WHERE email = ? OR telefono = ?`, [email, telefono], (err, row) => {
         if (err) {
-            return res.status(500).json({ error: err.message });
+            return res.status(500).json({ error: 'Errore durante la registrazione' });
         }
+
         if (row) {
             return res.status(400).json({ error: "Email o telefono già registrati" });
         }
 
-        db.run(`INSERT INTO utenti (nome, residenza, email, password, telefono) VALUES (?, ?, ?, ?, ?)`,
-            [nome, residenza, email, password, telefono],
-            function (err) {
-                if (err) {
-                    return res.status(500).json({ error: err.message });
-                }
-                res.json({ message: 'Registrazione avvenuta con successo', id: this.lastID });
+        // Hash della password
+        bcrypt.hash(password, 10, (err, hashedPassword) => {
+            if (err) {
+                return res.status(500).json({ error: 'Errore durante la registrazione' });
             }
-        );
+
+            // Inserimento utente
+            db.run(`INSERT INTO utenti (nome, residenza, email, password, telefono) VALUES (?, ?, ?, ?, ?)`,
+                [nome, residenza, email, hashedPassword, telefono], function(err) {
+                    if (err) {
+                        return res.status(500).json({ error: 'Errore durante la registrazione' });
+                    }
+                    res.json({ message: 'Registrazione avvenuta con successo', id: this.lastID });
+                }
+            );
+        });
     });
 });
-
-/**
- * @swagger
- * /login:
- *   post:
- *     summary: Effettua il login di un utente
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *               password:
- *                 type: string
- *     responses:
- *       200:
- *         description: Login effettuato con successo
- *       400:
- *         description: Errore nei dati di login
- */
 app.post('/login', (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-        return res.status(400).json({ error: "Email e password sono obbligatorie" });
+        return res.status(400).json({ error: 'Email e password sono obbligatori' });
     }
 
-    db.get(`SELECT * FROM utenti WHERE email = ?`, [email], (err, user) => {
+    db.get('SELECT * FROM utenti WHERE email = ?', [email], (err, row) => {
         if (err) {
-            return res.status(500).json({ error: err.message });
-        }
-        if (!user) {
-            return res.status(400).json({ error: "Utente non trovato" });
+            console.error('Errore database:', err);
+            return res.status(500).json({ error: 'Errore interno del server' });
         }
 
-        if (user.password !== password) {
-            return res.status(400).json({ error: "Password errata" });
+        if (!row) {
+            return res.status(400).json({ error: 'Email o password errati' });
         }
 
-        res.json({ message: 'Login effettuato con successo', user: { id: user.id, nome: user.nome, residenza: user.residenza, telefono: user.telefono } });
+        // Verifica la password
+        bcrypt.compare(password, row.password, (err, isMatch) => {
+            if (err) {
+                console.error('Errore durante la verifica della password:', err);
+                return res.status(500).json({ error: 'Errore interno del server' });
+            }
+
+            if (!isMatch) {
+                return res.status(400).json({ error: 'Email o password errati' });
+            }
+
+            // Login riuscito
+            res.json({ message: 'Login avvenuto con successo', user: { id: row.id, nome: row.nome, email: row.email } });
+        });
     });
 });
 
-/**
- * @swagger
- * /users/ordered:
- *   get:
- *     summary: Recupera la lista di utenti ordinata alfabeticamente
- *     responses:
- *       200:
- *         description: Lista degli utenti ordinata con successo
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: integer
- *                   nome:
- *                     type: string
- *                   email:
- *                     type: string
- *                   telefono:
- *                     type: string
- */
+
+app.get('/clients', (req, res) => {
+    console.log('Richiesta ricevuta per /clients');
+    db.all(`SELECT * FROM clienti`, (err, rows) => {
+        if (err) {
+            console.error('Errore nel recupero dei clienti:', err.message);
+            return res.status(500).json({ error: 'Errore nel recupero dei dati' });
+        }
+        console.log('Clienti trovati:', rows); // Aggiunto per debug
+        res.json(rows);
+    });
+});
+
+
+app.get('/datetime', (req, res) => {
+    const now = new Date();
+    const formattedDate = now.toLocaleString('it-IT', { 
+        dateStyle: 'full', 
+        timeStyle: 'medium' 
+    });
+    res.json({ datetime: formattedDate });
+});
+
+// Endpoint per ottenere tutti i clienti
+app.get('/clients', (req, res) => {
+    console.log('Richiesta ricevuta per /clients');
+    db.all(`SELECT * FROM clienti`, (err, rows) => {
+        if (err) {
+            console.error('Errore nel recupero dei clienti:', err.message);
+            return res.status(500).json({ error: 'Errore nel recupero dei dati' });
+        }
+        console.log('Clienti trovati:', rows); // Aggiunto per debug
+        res.json(rows); // Restituisce i clienti come JSON
+    });
+});
+
+// Endpoint per ottenere i clienti ordinati (A-Z o Z-A)
+app.get('/clients/ordered', (req, res) => {
+    const order = req.query.order === 'desc' ? 'DESC' : 'ASC';
+    db.all(`SELECT * FROM clienti ORDER BY nomecliente ${order}`, (err, rows) => {
+        if (err) {
+            console.error('Errore nel recupero dei clienti:', err.message);
+            return res.status(500).json({ error: 'Errore nel recupero dei dati' });
+        }
+        res.json(rows); // Restituisce i clienti ordinati
+    });
+});
+
+
 app.get('/users/ordered', (req, res) => {
     db.all(`SELECT id, nome, email, telefono FROM utenti ORDER BY nome ASC`, [], (err, rows) => {
         if (err) {
@@ -198,63 +177,8 @@ app.get('/users/ordered', (req, res) => {
     });
 });
 
-/**
- * @swagger
- * /clients/ordered:
- *   get:
- *     summary: Recupera la lista di clienti ordinata alfabeticamente
- *     responses:
- *       200:
- *         description: Lista dei clienti recuperata con successo
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 type: object
- *                 properties:
- *                   id:
- *                     type: integer
- *                   nomecliente:
- *                     type: string
- */
-app.get('/clients/ordered', (req, res) => {
-    db.all(`SELECT id, nomecliente FROM clienti ORDER BY nomecliente ASC`, [], (err, rows) => {
-        if (err) {
-            console.error('Errore nella ricerca dei clienti:', err.message); // Log dell'errore
-            return res.status(500).json({ error: err.message });
-        }
 
-        if (rows.length === 0) {
-            console.log('Nessun cliente trovato nel database.'); // Se la tabella è vuota
-        } else {
-            console.log('Clienti trovati:', rows); // Log dei clienti trovati
-        }
 
-        res.json(rows);
-    });
-});
-
-/**
- * @swagger
- * /clients/add:
- *   post:
- *     summary: Aggiunge un nuovo cliente al database
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               nomecliente:
- *                 type: string
- *     responses:
- *       200:
- *         description: Cliente aggiunto con successo
- *       400:
- *         description: Errore nei dati forniti
- */
 app.post('/clients/add', (req, res) => {
     const { nomecliente } = req.body;
 
@@ -271,19 +195,50 @@ app.post('/clients/add', (req, res) => {
     });
 });
 
-// Gestione della chiusura del database
-process.on('SIGINT', () => {
-    db.close((err) => {
+
+// Route per eliminare un cliente
+app.post('/clients/delete', (req, res) => {
+    const { idclienti } = req.body;  // Riceviamo l'ID del cliente da eliminare
+
+    if (!idclienti) {
+        return res.status(400).json({ error: 'ID cliente non fornito' });
+    }
+
+    console.log(`Richiesta di eliminazione del cliente con ID: ${idclienti}`); // Aggiunto per il debug
+
+    // Eseguiamo la query per eliminare il cliente dalla tabella
+    db.run('DELETE FROM clienti WHERE idclienti = ?', [idclienti], function (err) {
         if (err) {
-            console.error('Errore nella chiusura del database:', err.message);
+            console.error('Errore nella cancellazione del cliente:', err.message); // Log dell'errore
+            return res.status(500).json({ error: 'Errore nella cancellazione del cliente' });
         }
-        console.log('Chiusura del database.');
-        process.exit(0);
+
+        // Se il cliente è stato eliminato correttamente
+        if (this.changes === 0) {
+            console.log('Cliente non trovato per l\'eliminazione.'); // Aggiunto per il debug
+            return res.status(404).json({ error: 'Cliente non trovato' });
+        }
+
+        console.log(`Cliente con ID ${idclienti} eliminato con successo!`);
+        return res.status(200).json({ message: 'Cliente eliminato con successo!' });
     });
+});
+app.post('/logout', (req, res) => {
+    if (req.session) {
+        req.session.destroy(err => {
+            if (err) {
+                res.status(500).json({ error: 'Errore durante il logout' });
+            } else {
+                res.status(200).send();
+            }
+        });
+    } else {
+        res.status(200).send(); // Nessuna sessione da distruggere
+    }
 });
 
 // Avvio del server
-app.listen(port, () => {
-    console.log(`Server in esecuzione su http://localhost:${port}`);
-    console.log(`Documentazione Swagger disponibile su http://localhost:${port}/api-docs`);
+const host = '127.0.0.1'; // Può essere cambiato con il nome host desiderato
+app.listen(port, host, () => {
+    console.log(`Server in esecuzione su http://${host}:${port}`);
 });

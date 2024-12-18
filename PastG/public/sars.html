@@ -3,62 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Utenti e Clienti</title>
+    <title>Gestione Utenti e Clienti</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap">
     <style>
         body {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #c4a484, #8b6f47);
+            background: linear-gradient(135deg, #f3e5d0, #c9a571);
             color: #333;
             margin: 0;
             padding: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
+            min-height: 100vh;
+        }
+
+        .logout-bar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            margin: 10px;
+        }
+
+        .logout-bar button {
+            background-color: #8b6f47;
+            color: white;
+            font-size: 1rem;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .logout-bar button:hover {
+            background-color: #6f4e37;
+            transform: scale(1.05);
         }
 
         .filters {
             width: 90%;
             max-width: 1200px;
             display: flex;
+            align-items: center;
             justify-content: space-between;
             margin: 20px 0;
-            padding: 10px;
-            background-color: rgba(255, 255, 255, 0.9);
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
         }
 
-        .filters input[type="text"] {
-            padding: 10px;
-            font-size: 1rem;
-            border-radius: 5px;
-            border: 1px solid #ddd;
-            margin-right: 10px;
-            width: 80%;
+        .filters .sort-buttons {
+            display: flex;
+            gap: 10px;
         }
 
         .filters button {
             background-color: #8b6f47;
             color: white;
-            font-size: 1.5rem;
-            padding: 10px 20px;
+            font-size: 1rem;
+            padding: 10px 15px;
             border: none;
-            border-radius: 50%;
+            border-radius: 8px;
             cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 50px;
-            height: 50px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
         }
 
         .filters button:hover {
             background-color: #6f4e37;
+            transform: scale(1.05);
+        }
+
+        .filters input[type="text"] {
+            flex: 1;
+            padding: 12px;
+            font-size: 1rem;
+            border-radius: 8px;
+            border: 1px solid #d1c3b4;
+            outline: none;
+            transition: border 0.3s ease, transform 0.3s ease;
+        }
+
+        .filters input[type="text"]:focus {
+            border: 1px solid #8b6f47;
+            transform: scale(1.05);
         }
 
         .card-container {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 20px;
             width: 90%;
             max-width: 1200px;
@@ -67,186 +101,108 @@
 
         .card {
             background-color: #fff;
-            border-radius: 10px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
             padding: 20px;
             text-align: center;
-            transition: transform 0.3s ease;
+            position: relative;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
         .card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-8px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
         }
 
         .card h3 {
-            font-size: 1.5rem;
-            color: #6f4e37;
+            font-size: 1.6rem;
+            color: #8b6f47;
             margin-bottom: 10px;
-        }
-
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            display: none;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            width: 90%;
-            max-width: 400px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .modal-content h2 {
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-        }
-
-        .modal-content input[type="text"] {
-            width: 80%;
-            padding: 10px;
-            font-size: 1rem;
-            margin: 10px 0;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-
-        .modal-content button {
-            padding: 10px 20px;
-            font-size: 1rem;
-            border: none;
-            border-radius: 5px;
-            background-color: #8b6f47;
-            color: white;
-            cursor: pointer;
-        }
-
-        .modal-content button:hover {
-            background-color: #6f4e37;
         }
     </style>
 </head>
+
 <body>
+    <div class="logout-bar">
+        <button id="logoutButton" class="logout-btn">Logout</button>
+    </div>
 
     <div class="filters">
+        <div class="sort-buttons">
+            <button id="sortAscButton">Ordina A-Z</button>
+            <button id="sortDescButton">Ordina Z-A</button>
+        </div>
         <input id="clientSearchInput" type="text" placeholder="Cerca cliente" oninput="searchClient()" />
         <button onclick="showModal()">+</button>
     </div>
 
     <div id="displayContainer" class="card-container"></div>
 
-    <!-- Modale per aggiungere un cliente -->
-    <div id="addClientModal" class="modal">
-        <div class="modal-content">
-            <h2>Aggiungi Cliente</h2>
-            <input id="newClientName" type="text" placeholder="Inserisci nome cliente" />
-            <div>
-                <button onclick="addClient()">Aggiungi</button>
-                <button onclick="closeModal()">Chiudi</button>
-            </div>
-        </div>
-    </div>
-
     <script>
-        // Mostra la modale
-        function showModal() {
-            document.getElementById('addClientModal').style.display = 'flex';
-        }
-
-        // Chiude la modale
-        function closeModal() {
-            document.getElementById('addClientModal').style.display = 'none';
-        }
-
-        // Funzione per caricare i clienti ordinati
-        function loadClientsOrdered() {
-            const order = "default";
+        // Carica la lista ordinata dei clienti tramite AJAX
+        function loadClientsOrdered(order = 'asc') {
+            // Usa endpoint diversi per l'ordinamento ascendente e discendente
+            const endpoint = order === 'asc' ? '/clients/ordered?order=asc' : '/clients/ordered?order=desc';
             const xhr = new XMLHttpRequest();
-            xhr.open("GET", `/clients/ordered?order=${order}`, true);
+            xhr.open("GET", endpoint, true);
             xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    const clients = JSON.parse(xhr.responseText);
-                    displayClients(clients);
-                } else if (xhr.readyState === 4) {
-                    alert("Errore nel caricamento clienti");
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        try {
+                            const clients = JSON.parse(xhr.responseText);
+                            console.log("Clienti ricevuti:", clients);
+                            displayClients(clients);
+                        } catch (e) {
+                            console.error("Errore nel parsing della risposta JSON:", e);
+                        }
+                    } else {
+                        console.error("Errore caricamento clienti:", xhr.statusText);
+                        alert(`Errore server: ${xhr.status}`);
+                    }
                 }
             };
             xhr.send();
         }
-
-        // Funzione per visualizzare i clienti nella pagina
+    
+        // Mostra i clienti in formato card
         function displayClients(clients) {
             const container = document.getElementById('displayContainer');
-            container.innerHTML = ''; // Pulisce il contenitore
-
+            container.innerHTML = '';
             if (clients.length === 0) {
-                container.innerHTML = '<p>Nessun cliente trovato.</p>';
+                container.innerHTML = '<p class="no-client-message">Nessun cliente trovato.</p>';
             } else {
                 clients.forEach(client => {
                     const card = document.createElement('div');
                     card.className = 'card';
-                    card.innerHTML = `
-                        <h3>${client.nomecliente}</h3>
-                    `;
+                    card.innerHTML = `<h3>${client.nomecliente}</h3>`;
                     container.appendChild(card);
                 });
             }
         }
-
-        // Funzione per aggiungere un nuovo cliente
-        function addClient() {
-            const clientName = document.getElementById('newClientName').value.trim();
-
-            if (!clientName) {
-                alert("Inserisci un nome valido per il cliente.");
-                return;
-            }
-
-            const xhr = new XMLHttpRequest();
-            xhr.open("POST", "/clients/add", true);
-            xhr.setRequestHeader("Content-Type", "application/json");
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    alert("Cliente aggiunto con successo!");
-                    closeModal(); // Chiudi la modale
-                    loadClientsOrdered(); // Aggiorna l'elenco clienti
-                } else if (xhr.readyState === 4) {
-                    alert("Errore nell'aggiunta del cliente");
-                }
-            };
-            xhr.send(JSON.stringify({ nomecliente: clientName }));
-        }
-
-        // Funzione per cercare un cliente
+    
+        // Event listener per ordinare in ordine crescente
+        document.getElementById('sortAscButton').addEventListener('click', function () {
+            loadClientsOrdered('asc');
+        });
+    
+        // Event listener per ordinare in ordine decrescente
+        document.getElementById('sortDescButton').addEventListener('click', function () {
+            loadClientsOrdered('desc');
+        });
+    
+        // Funzione di ricerca locale
         function searchClient() {
-            const query = encodeURIComponent(document.getElementById('clientSearchInput').value.trim().toLowerCase());
-            const xhr = new XMLHttpRequest();
-            xhr.open("GET", `/clients/search?q=${query}`, true);
-            xhr.onreadystatechange = function () {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    const clients = JSON.parse(xhr.responseText);
-                    displayClients(clients);
-                } else if (xhr.readyState === 4) {
-                    console.error(xhr.responseText); // Per verificare l'errore di backend
-                    alert("Errore nella ricerca clienti");
-                }
-            };
-            xhr.send();
+            const searchTerm = document.getElementById('clientSearchInput').value.toLowerCase();
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                const clientName = card.querySelector('h3').textContent.toLowerCase();
+                card.style.display = clientName.includes(searchTerm) ? '' : 'none';
+            });
         }
-
-        // Carica i clienti ordinati al caricamento della pagina
-        loadClientsOrdered();
+    
+        // Carica la lista iniziale dei clienti
+        loadClientsOrdered('asc');
     </script>
+    
 </body>
 </html>
