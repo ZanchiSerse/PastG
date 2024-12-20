@@ -159,19 +159,43 @@ app.post('/logout', (req, res) => {
         res.status(200).send(); // Nessuna sessione da distruggere
     }
 });
-app.post('/register', (req, res) => {
+
+const validateEmail = async (email) => {
+    try {
+        const response = await fetch(`https://emailvalidation.abstractapi.com/v1/?api_key=9de1734fe7c844f89aae6090e3cf6fca&email=${email}`);
+        const data = await response.json();
+        console.log('Risposta API:', data); // Debug
+        return data.is_valid_format.value; // Accesso corretto al valore booleano
+    } catch (error) {
+        console.error('Errore validazione email:', error);
+        throw error;
+    }
+};
+
+app.post('/register', async (req, res) => {  // Aggiunto async
     const { nome, telefono, residenza, email, password } = req.body;
 
-    const query = `INSERT INTO utenti (nome, residenza, email, password, telefono) VALUES (?, ?, ?, ?, ?)`;
-    db.run(query, [nome, residenza, email, password, telefono], function (err) {
-        if (err) {
-            if (err.message.includes('UNIQUE')) {
-                return res.status(400).json({ error: "Email o telefono già registrati." });
-            }
-            return res.status(500).json({ error: "Errore durante la registrazione." });
+    try {
+        const isValidEmail = await validateEmail(email);
+        console.log('Risultato validazione:', isValidEmail); // Debug
+        if (!isValidEmail) {
+            return res.status(400).json({ error: "Formato email non valido" });
         }
-        res.status(201).json({ id: this.lastID, message: "Registrazione completata con successo." });
-    });
+
+        const query = `INSERT INTO utenti (nome, residenza, email, password, telefono) VALUES (?, ?, ?, ?, ?)`;
+        db.run(query, [nome, residenza, email, password, telefono], function (err) {
+            if (err) {
+                if (err.message.includes('UNIQUE')) {
+                    return res.status(400).json({ error: "Email o telefono già registrati." });
+                }
+                return res.status(500).json({ error: "Errore durante la registrazione." });
+            }
+            res.status(201).json({ id: this.lastID, message: "Registrazione completata con successo." });
+        });
+    } catch (error) {
+        console.error("Errore nella validazione email:", error);
+        res.status(500).json({ error: "Errore durante la validazione dell'email." });
+    }
 });
 
 // Login

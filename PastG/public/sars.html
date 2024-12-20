@@ -153,6 +153,10 @@
             document.getElementById('addClientModal').style.display = 'block';
         }
 
+        document.getElementById('logoutButton').addEventListener('click', function() {
+            window.location.href = '/index.html'; // Sostituisci con il percorso corretto della pagina di login
+        });
+
         // Funzione per chiudere il modale
         function closeModal() {
             document.getElementById('addClientModal').style.display = 'none';
