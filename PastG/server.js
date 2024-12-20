@@ -3,6 +3,8 @@ const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const bcrypt = require('bcrypt');
 const app = express();
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpecs = require('./swagger');
 const port = 3000;
 const cors = require('cors');
 app.use(cors());
@@ -12,7 +14,7 @@ const corsOptions = {
     allowedHeaders: ['Content-Type'],
 };
 app.use(cors(corsOptions));
-
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpecs));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 //const DBMock = require('./DBMock');
@@ -47,7 +49,22 @@ db.run(`CREATE TABLE IF NOT EXISTS clienti (
 )`);
 
 
-
+/**
+ * @swagger
+ * /datetime:
+ *   get:
+ *     summary: Ottiene data e ora corrente
+ *     responses:
+ *       200:
+ *         description: Data e ora formattata
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 datetime:
+ *                   type: string
+ */
 app.get('/datetime', (req, res) => {
     const now = new Date();
     const formattedDate = now.toLocaleString('it-IT', { 
@@ -57,6 +74,28 @@ app.get('/datetime', (req, res) => {
     res.json({ datetime: formattedDate });
 });
 
+/**
+ * @swagger
+ * /clients:
+ *   post:
+ *     summary: Aggiunge un nuovo cliente
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - nomecliente
+ *             properties:
+ *               nomecliente:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Cliente creato con successo
+ *       400:
+ *         description: Dati mancanti o non validi
+ */
 app.post('/clients', (req, res) => {
     const { nomecliente } = req.body;
 
