@@ -15,6 +15,8 @@ app.use(cors(corsOptions));
 
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
+//const DBMock = require('./DBMock');
+//let dab = new DBMock();
 
 
 
@@ -44,91 +46,6 @@ db.run(`CREATE TABLE IF NOT EXISTS clienti (
     nomecliente TEXT NOT NULL UNIQUE
 )`);
 
-app.post('/register', (req, res) => {
-    const { nome, residenza, email, password, telefono } = req.body;
-
-    if (!nome || !residenza || !email || !password || !telefono) {
-        return res.status(400).json({ error: "Tutti i campi sono obbligatori" });
-    }
-
-    if (password.length < 6) {
-        return res.status(400).json({ error: "La password deve avere almeno 6 caratteri" });
-    }
-
-    // Verifica esistenza utente
-    db.get(`SELECT * FROM utenti WHERE email = ? OR telefono = ?`, [email, telefono], (err, row) => {
-        if (err) {
-            return res.status(500).json({ error: 'Errore durante la registrazione' });
-        }
-
-        if (row) {
-            return res.status(400).json({ error: "Email o telefono già registrati" });
-        }
-
-        // Hash della password
-        bcrypt.hash(password, 10, (err, hashedPassword) => {
-            if (err) {
-                return res.status(500).json({ error: 'Errore durante la registrazione' });
-            }
-
-            // Inserimento utente
-            db.run(`INSERT INTO utenti (nome, residenza, email, password, telefono) VALUES (?, ?, ?, ?, ?)`,
-                [nome, residenza, email, hashedPassword, telefono], function(err) {
-                    if (err) {
-                        return res.status(500).json({ error: 'Errore durante la registrazione' });
-                    }
-                    res.json({ message: 'Registrazione avvenuta con successo', id: this.lastID });
-                }
-            );
-        });
-    });
-});
-app.post('/login', (req, res) => {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-        return res.status(400).json({ error: 'Email e password sono obbligatori' });
-    }
-
-    db.get('SELECT * FROM utenti WHERE email = ?', [email], (err, row) => {
-        if (err) {
-            console.error('Errore database:', err);
-            return res.status(500).json({ error: 'Errore interno del server' });
-        }
-
-        if (!row) {
-            return res.status(400).json({ error: 'Email o password errati' });
-        }
-
-        // Verifica la password
-        bcrypt.compare(password, row.password, (err, isMatch) => {
-            if (err) {
-                console.error('Errore durante la verifica della password:', err);
-                return res.status(500).json({ error: 'Errore interno del server' });
-            }
-
-            if (!isMatch) {
-                return res.status(400).json({ error: 'Email o password errati' });
-            }
-
-            // Login riuscito
-            res.json({ message: 'Login avvenuto con successo', user: { id: row.id, nome: row.nome, email: row.email } });
-        });
-    });
-});
-
-
-app.get('/clients', (req, res) => {
-    console.log('Richiesta ricevuta per /clients');
-    db.all(`SELECT * FROM clienti`, (err, rows) => {
-        if (err) {
-            console.error('Errore nel recupero dei clienti:', err.message);
-            return res.status(500).json({ error: 'Errore nel recupero dei dati' });
-        }
-        console.log('Clienti trovati:', rows); // Aggiunto per debug
-        res.json(rows);
-    });
-});
 
 
 app.get('/datetime', (req, res) => {
@@ -140,28 +57,34 @@ app.get('/datetime', (req, res) => {
     res.json({ datetime: formattedDate });
 });
 
-// Endpoint per ottenere tutti i clienti
-app.get('/clients', (req, res) => {
-    console.log('Richiesta ricevuta per /clients');
-    db.all(`SELECT * FROM clienti`, (err, rows) => {
+app.post('/clients', (req, res) => {
+    const { nomecliente } = req.body;
+
+    if (!nomecliente) {
+        return res.status(400).json({ error: "Il nome del cliente è obbligatorio." });
+    }
+
+    const query = `INSERT INTO clienti (nomecliente) VALUES (?)`;
+    db.run(query, [nomecliente], function (err) {
         if (err) {
-            console.error('Errore nel recupero dei clienti:', err.message);
-            return res.status(500).json({ error: 'Errore nel recupero dei dati' });
+            console.error('Errore SQL:', err.message);
+            return res.status(500).json({ error: "Errore durante il salvataggio del cliente." });
         }
-        console.log('Clienti trovati:', rows); // Aggiunto per debug
-        res.json(rows); // Restituisce i clienti come JSON
+        res.status(201).json({ id: this.lastID, nomecliente });
     });
 });
 
-// Endpoint per ottenere i clienti ordinati (A-Z o Z-A)
+// Endpoint per ottenere i clienti ordinati
 app.get('/clients/ordered', (req, res) => {
+    console.log("here")
     const order = req.query.order === 'desc' ? 'DESC' : 'ASC';
-    db.all(`SELECT * FROM clienti ORDER BY nomecliente ${order}`, (err, rows) => {
+    const query = `SELECT * FROM clienti ORDER BY nomecliente ${order}`;
+    db.all(query, [], (err, rows) => {
         if (err) {
-            console.error('Errore nel recupero dei clienti:', err.message);
-            return res.status(500).json({ error: 'Errore nel recupero dei dati' });
+            console.error('Errore durante la lettura dei clienti:', err);
+            return res.status(500).json({ error: "Errore del server." });
         }
-        res.json(rows); // Restituisce i clienti ordinati
+        res.json(rows);
     });
 });
 
@@ -235,6 +158,33 @@ app.post('/logout', (req, res) => {
     } else {
         res.status(200).send(); // Nessuna sessione da distruggere
     }
+});
+app.post('/register', (req, res) => {
+    const { nome, telefono, residenza, email, password } = req.body;
+
+    const query = `INSERT INTO utenti (nome, residenza, email, password, telefono) VALUES (?, ?, ?, ?, ?)`;
+    db.run(query, [nome, residenza, email, password, telefono], function (err) {
+        if (err) {
+            if (err.message.includes('UNIQUE')) {
+                return res.status(400).json({ error: "Email o telefono già registrati." });
+            }
+            return res.status(500).json({ error: "Errore durante la registrazione." });
+        }
+        res.status(201).json({ id: this.lastID, message: "Registrazione completata con successo." });
+    });
+});
+
+// Login
+app.post('/login', (req, res) => {
+    const { email, password } = req.body;
+
+    const query = `SELECT * FROM utenti WHERE email = ?`;
+    db.get(query, [email], (err, user) => {
+        if (err || !user || user.password !== password) {
+            return res.status(401).json({ error: "Credenziali non valide." });
+        }
+        res.status(200).json({ user: { id: user.id, nome: user.nome, email: user.email } });
+    });
 });
 
 // Avvio del server

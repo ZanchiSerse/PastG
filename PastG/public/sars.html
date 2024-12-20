@@ -119,6 +119,7 @@
             color: #8b6f47;
             margin-bottom: 10px;
         }
+   
     </style>
 </head>
 
@@ -133,15 +134,66 @@
             <button id="sortDescButton">Ordina Z-A</button>
         </div>
         <input id="clientSearchInput" type="text" placeholder="Cerca cliente" oninput="searchClient()" />
-        <button onclick="showModal()">+</button>
+        <button id="addClientButton">+</button>
     </div>
 
     <div id="displayContainer" class="card-container"></div>
 
+    <!-- Modal per aggiungere il cliente -->
+    <div id="addClientModal" style="display: none;">
+        <h3>Aggiungi Cliente</h3>
+        <input id="newClientName" type="text" placeholder="Nome Cliente">
+        <button onclick="closeModal()">Annulla</button>
+        <button id="saveClientButton">Salva</button>
+    </div>
+
     <script>
-        // Carica la lista ordinata dei clienti tramite AJAX
+        // Funzione per aprire il modale
+        function showModal() {
+            document.getElementById('addClientModal').style.display = 'block';
+        }
+
+        // Funzione per chiudere il modale
+        function closeModal() {
+            document.getElementById('addClientModal').style.display = 'none';
+            document.getElementById('newClientName').value = ''; // Resetta il campo input
+        }
+
+        // Funzione per salvare il cliente
+        function saveClient() {
+            const nomeCliente = document.getElementById('newClientName').value.trim();
+            if (!nomeCliente) {
+                alert("Nome cliente non valido!");
+                return;
+            }
+
+            fetch('/clients', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ nomecliente: nomeCliente })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(`Cliente salvato con ID: ${data.id}`);
+                closeModal();
+                loadClientsOrdered('asc');  // Ricarica la lista dei clienti
+            })
+            .catch(err => {
+                alert("Errore durante il salvataggio del cliente");
+                console.error(err);
+            });
+        }
+
+        // Aggiungi evento per aprire il modale
+        document.getElementById('addClientButton').addEventListener('click', showModal);
+        
+        // Aggiungi evento per salvare il cliente
+        document.getElementById('saveClientButton').addEventListener('click', saveClient);
+
+        // Funzione per caricare i clienti
         function loadClientsOrdered(order = 'asc') {
-            // Usa endpoint diversi per l'ordinamento ascendente e discendente
             const endpoint = order === 'asc' ? '/clients/ordered?order=asc' : '/clients/ordered?order=desc';
             const xhr = new XMLHttpRequest();
             xhr.open("GET", endpoint, true);
@@ -150,7 +202,6 @@
                     if (xhr.status === 200) {
                         try {
                             const clients = JSON.parse(xhr.responseText);
-                            console.log("Clienti ricevuti:", clients);
                             displayClients(clients);
                         } catch (e) {
                             console.error("Errore nel parsing della risposta JSON:", e);
@@ -163,7 +214,7 @@
             };
             xhr.send();
         }
-    
+
         // Mostra i clienti in formato card
         function displayClients(clients) {
             const container = document.getElementById('displayContainer');
@@ -179,8 +230,8 @@
                 });
             }
         }
-    
-        // Event listener per ordinare in ordine crescente
+
+                // Event listener per ordinare in ordine crescente
         document.getElementById('sortAscButton').addEventListener('click', function () {
             loadClientsOrdered('asc');
         });
@@ -199,10 +250,9 @@
                 card.style.display = clientName.includes(searchTerm) ? '' : 'none';
             });
         }
-    
-        // Carica la lista iniziale dei clienti
+
+        // Avvio della lista dei clienti
         loadClientsOrdered('asc');
     </script>
-    
 </body>
 </html>
