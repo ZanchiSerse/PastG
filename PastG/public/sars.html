@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestione Utenti e Clienti</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap">
+    
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f3e5d0, #c9a571);
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .logout-bar {
+            position: fixed;
+            top: 0;
+            right: 0;
+            margin: 10px;
+        }
+
+        .logout-bar button {
+            background-color: #8b6f47;
+            color: white;
+            font-size: 1rem;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .logout-bar button:hover {
+            background-color: #6f4e37;
+            transform: scale(1.05);
+        }
+
+        .filters {
+            width: 90%;
+            max-width: 1200px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        .filters .sort-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .filters button {
+            background-color: #8b6f47;
+            color: white;
+            font-size: 1rem;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .filters button:hover {
+            background-color: #6f4e37;
+            transform: scale(1.05);
+        }
+
+        .filters input[type="text"] {
+            flex: 1;
+            padding: 12px;
+            font-size: 1rem;
+            border-radius: 8px;
+            border: 1px solid #d1c3b4;
+            outline: none;
+            transition: border 0.3s ease, transform 0.3s ease;
+        }
+
+        .filters input[type="text"]:focus {
+            border: 1px solid #8b6f47;
+            transform: scale(1.05);
+        }
+
+        .card-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            width: 90%;
+            max-width: 1200px;
+            padding: 20px;
+        }
+
+        .card {
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .card h3 {
+            font-size: 1.6rem;
+            color: #8b6f47;
+            margin-bottom: 10px;
+        }
+   
+    </style>
+</head>
+
+<body>
+    <div class="logout-bar">
+        <button id="logoutButton" class="logout-btn">Logout</button>
+    </div>
+
+    <div class="filters">
+        <div class="sort-buttons">
+            <button id="sortAscButton">Ordina A-Z</button>
+            <button id="sortDescButton">Ordina Z-A</button>
+        </div>
+        <input id="clientSearchInput" type="text" placeholder="Cerca cliente" oninput="searchClient()" />
+        <button id="addClientButton">+</button>
+    </div>
+
+    <div id="displayContainer" class="card-container"></div>
+
+    <!-- Modal per aggiungere il cliente -->
+    <div id="addClientModal" style="display: none;">
+        <h3>Aggiungi Cliente</h3>
+        <input id="newClientName" type="text" placeholder="Nome Cliente">
+        <button onclick="closeModal()">Annulla</button>
+        <button id="saveClientButton">Salva</button>
+    </div>
+
+    <script>
+        // Funzione per aprire il modale
+        function showModal() {
+            document.getElementById('addClientModal').style.display = 'block';
+        }
+
+        document.getElementById('logoutButton').addEventListener('click', function() {
+            window.location.href = '/index.html'; // Sostituisci con il percorso corretto della pagina di login
+        });
+
+        // Funzione per chiudere il modale
+        function closeModal() {
+            document.getElementById('addClientModal').style.display = 'none';
+            document.getElementById('newClientName').value = ''; // Resetta il campo input
+        }
+
+        // Funzione per salvare il cliente
+        function saveClient() {
+            const nomeCliente = document.getElementById('newClientName').value.trim();
+            if (!nomeCliente) {
+                alert("Nome cliente non valido!");
+                return;
+            }
+
+            fetch('/clients', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ nomecliente: nomeCliente })
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(`Cliente salvato con ID: ${data.id}`);
+                closeModal();
+                loadClientsOrdered('asc');  // Ricarica la lista dei clienti
+            })
+            .catch(err => {
+                alert("Errore durante il salvataggio del cliente");
+                console.error(err);
+            });
+        }
+
+        // Aggiungi evento per aprire il modale
+        document.getElementById('addClientButton').addEventListener('click', showModal);
+        
+        // Aggiungi evento per salvare il cliente
+        document.getElementById('saveClientButton').addEventListener('click', saveClient);
+
+        // Funzione per caricare i clienti
+        function loadClientsOrdered(order = 'asc') {
+            const endpoint = order === 'asc' ? '/clients/ordered?order=asc' : '/clients/ordered?order=desc';
+            const xhr = new XMLHttpRequest();
+            xhr.open("GET", endpoint, true);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        try {
+                            const clients = JSON.parse(xhr.responseText);
+                            displayClients(clients);
+                        } catch (e) {
+                            console.error("Errore nel parsing della risposta JSON:", e);
+                        }
+                    } else {
+                        console.error("Errore caricamento clienti:", xhr.statusText);
+                        alert(`Errore server: ${xhr.status}`);
+                    }
+                }
+            };
+            xhr.send();
+        }
+
+        // Mostra i clienti in formato card
+        function displayClients(clients) {
+            const container = document.getElementById('displayContainer');
+            container.innerHTML = '';
+            if (clients.length === 0) {
+                container.innerHTML = '<p class="no-client-message">Nessun cliente trovato.</p>';
+            } else {
+                clients.forEach(client => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `<h3>${client.nomecliente}</h3>`;
+                    container.appendChild(card);
+                });
+            }
+        }
+
+                // Event listener per ordinare in ordine crescente
+        document.getElementById('sortAscButton').addEventListener('click', function () {
+            loadClientsOrdered('asc');
+        });
+    
+        // Event listener per ordinare in ordine decrescente
+        document.getElementById('sortDescButton').addEventListener('click', function () {
+            loadClientsOrdered('desc');
+        });
+    
+        // Funzione di ricerca locale
+        function searchClient() {
+            const searchTerm = document.getElementById('clientSearchInput').value.toLowerCase();
+            const cards = document.querySelectorAll('.card');
+            cards.forEach(card => {
+                const clientName = card.querySelector('h3').textContent.toLowerCase();
+                card.style.display = clientName.includes(searchTerm) ? '' : 'none';
+            });
+        }
+
+        // Avvio della lista dei clienti
+        loadClientsOrdered('asc');
+    </script>
+</body>
+</html>
