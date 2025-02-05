@@ -55,8 +55,8 @@ app.use(passport.session());
 
 // Configurazione per il login tramite Google
 passport.use(new GoogleStrategy({
-    clientID: 'clientid',
-    clientSecret: 'clientsecret',
+    clientID: 'api',
+    clientSecret: 'api',
     callbackURL: 'http://localhost:3000/auth/google/callback'
 }, (accessToken, refreshToken, profile, done) => {
     // Puoi salvare o gestire il profilo utente qui
