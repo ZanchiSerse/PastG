@@ -1,0 +1,359 @@
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2>Ricerca Ordini</h2>
+            </div>
+            <div class="card-body">
+                <form id="searchForm" class="mb-4">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label for="filter_cliente" class="form-label">Cliente</label>
+                            <select class="form-select" id="filter_cliente" name="cliente_id">
+                                <option value="">Tutti i clienti</option>
+                                {{#each clienti}}
+                                <option value="{{idclienti}}" {{#if (eq ../selectedCliente idclienti)}}selected{{/if}}>
+                                    {{nomecliente}}
+                                </option>
+                                {{/each}}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="filter_stato" class="form-label">Stato</label>
+                            <select class="form-select" id="filter_stato" name="stato">
+                                <option value="">Tutti gli stati</option>
+                                <option value="pending" {{#if (eq selectedStato "pending")}}selected{{/if}}>In attesa</option>
+                                <option value="completed" {{#if (eq selectedStato "completed")}}selected{{/if}}>Completato</option>
+                                <option value="refused" {{#if (eq selectedStato "refused")}}selected{{/if}}>Rifiutato</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="search_text" class="form-label">Testo di ricerca</label>
+                            <input type="text" class="form-control" id="search_text" name="search_text" 
+                                placeholder="Cerca nella descrizione" value="{{searchText}}">
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button type="submit" class="btn btn-primary w-100">Cerca</button>
+                        </div>
+                    </div>
+                </form>
+
+                <div id="loading" class="text-center py-4" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Caricamento in corso...</span>
+                    </div>
+                    <p class="mt-2">Ricerca in corso...</p>
+                </div>
+
+                <div id="results-container" class="table-responsive">
+                    {{#if ordini.length}}
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                {{#if isAdmin}}
+                                <th>Utente</th>
+                                {{/if}}
+                                <th>Cliente</th>
+                                <th>Descrizione</th>
+                                <th>Stato</th>
+                                <th>Data Creazione</th>
+                                {{#if isAdmin}}
+                                <th>Azioni</th>
+                                {{/if}}
+                            </tr>
+                        </thead>
+                        <tbody id="results-body">
+                            {{#each ordini}}
+                            <tr class="{{stato}}">
+                                <td>{{id}}</td>
+                                {{#if ../isAdmin}}
+                                <td>{{nome_utente}}</td>
+                                {{/if}}
+                                <td>{{nomecliente}}</td>
+                                <td>{{descrizione}}</td>
+                                <td>
+                                    {{#if (eq stato "pending")}}
+                                    <span class="badge bg-warning">In attesa</span>
+                                    {{else if (eq stato "completed")}}
+                                    <span class="badge bg-success">Completato</span>
+                                    {{else if (eq stato "refused")}}
+                                    <span class="badge bg-danger">Rifiutato</span>
+                                    {{/if}}
+                                </td>
+                                <td>{{data_creazione}}</td>
+                                {{#if ../isAdmin}}
+                                <td class="actions">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        {{#if (eq stato "pending")}}
+                                        <form action="/orders/update" method="post" class="d-inline">
+                                            <input type="hidden" name="orderId" value="{{id}}">
+                                            <input type="hidden" name="stato" value="completed">
+                                            <button type="submit" class="btn btn-success">Completa</button>
+                                        </form>
+                                        <form action="/orders/update" method="post" class="d-inline">
+                                            <input type="hidden" name="orderId" value="{{id}}">
+                                            <input type="hidden" name="stato" value="refused">
+                                            <button type="submit" class="btn btn-warning">Rifiuta</button>
+                                        </form>
+                                        {{/if}}
+                                        <button type="button" class="btn btn-danger delete-order" data-id="{{id}}">Elimina</button>
+                                    </div>
+                                </td>
+                                {{/if}}
+                            </tr>
+                            {{/each}}
+                        </tbody>
+                    </table>
+                    {{else}}
+                    <div class="alert alert-info">
+                        Nessun ordine trovato con i criteri di ricerca specificati.
+                    </div>
+                    {{/if}}
+                </div>
+
+                <!-- Modal di conferma eliminazione -->
+                <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Conferma eliminazione</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>Sei sicuro di voler eliminare questo ordine?</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                                <button type="button" class="btn btn-danger" id="confirmDelete">Elimina</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchForm = document.getElementById('searchForm');
+        const resultsContainer = document.getElementById('results-container');
+        const resultsBody = document.getElementById('results-body');
+        const loadingIndicator = document.getElementById('loading');
+        let deleteOrderId = null;
+        const isAdmin = {{isAdmin}} ? true : false;
+
+        // Gestione del submit del form con AJAX
+        searchForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Mostra l'indicatore di caricamento
+            resultsContainer.style.display = 'none';
+            loadingIndicator.style.display = 'block';
+            
+            // Raccoglie i dati dal form
+            const clienteId = document.getElementById('filter_cliente').value;
+            const stato = document.getElementById('filter_stato').value;
+            const searchText = document.getElementById('search_text').value;
+            
+            // Costruisce l'URL per la richiesta AJAX
+            const url = `/api/orders/search?cliente_id=${encodeURIComponent(clienteId || '')}&stato=${encodeURIComponent(stato || '')}&search_text=${encodeURIComponent(searchText || '')}`;
+            
+            // Effettua la richiesta con XMLHttpRequest invece di fetch
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', url, true);
+            
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    // Nasconde l'indicatore di caricamento
+                    loadingIndicator.style.display = 'none';
+                    
+                    if (xhr.status === 200) {
+                        try {
+                            const data = JSON.parse(xhr.responseText);
+                            // Aggiorna la tabella con i risultati
+                            updateResultsTable(data.ordini);
+                            // Mostra la tabella dei risultati
+                            resultsContainer.style.display = 'block';
+                        } catch (error) {
+                            console.error('Errore:', error);
+                            resultsContainer.innerHTML = `
+                                <div class="alert alert-danger">
+                                    Si è verificato un errore durante l'elaborazione dei dati.
+                                </div>
+                            `;
+                            resultsContainer.style.display = 'block';
+                        }
+                    } else {
+                        console.error('Errore:', xhr.statusText);
+                        resultsContainer.innerHTML = `
+                            <div class="alert alert-danger">
+                                Si è verificato un errore durante la ricerca. Riprova più tardi.
+                            </div>
+                        `;
+                        resultsContainer.style.display = 'block';
+                    }
+                }
+            };
+            
+            xhr.onerror = function() {
+                console.error('Errore di rete');
+                loadingIndicator.style.display = 'none';
+                resultsContainer.innerHTML = `
+                    <div class="alert alert-danger">
+                        Si è verificato un errore di rete. Controlla la tua connessione.
+                    </div>
+                `;
+                resultsContainer.style.display = 'block';
+            };
+            
+            xhr.send();
+        });
+
+        // Funzione per aggiornare la tabella dei risultati
+        function updateResultsTable(ordini) {
+            if (ordini.length === 0) {
+                resultsContainer.innerHTML = `
+                    <div class="alert alert-info">
+                        Nessun ordine trovato con i criteri di ricerca specificati.
+                    </div>
+                `;
+                return;
+            }
+
+            let tableHTML = `
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            ${isAdmin ? '<th>Utente</th>' : ''}
+                            <th>Cliente</th>
+                            <th>Descrizione</th>
+                            <th>Stato</th>
+                            <th>Data Creazione</th>
+                            ${isAdmin ? '<th>Azioni</th>' : ''}
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            ordini.forEach(ordine => {
+                let statoText = '';
+                if (ordine.stato === 'pending') {
+                    statoText = '<span class="badge bg-warning">In attesa</span>';
+                } else if (ordine.stato === 'completed') {
+                    statoText = '<span class="badge bg-success">Completato</span>';
+                } else if (ordine.stato === 'refused') {
+                    statoText = '<span class="badge bg-danger">Rifiutato</span>';
+                }
+                
+                tableHTML += `
+                    <tr class="${ordine.stato}">
+                        <td>${ordine.id}</td>
+                        ${isAdmin ? `<td>${ordine.nome_utente || ''}</td>` : ''}
+                        <td>${ordine.nomecliente}</td>
+                        <td>${ordine.descrizione}</td>
+                        <td>${statoText}</td>
+                        <td>${ordine.data_creazione}</td>
+                `;
+                
+                if (isAdmin) {
+                    tableHTML += `
+                        <td class="actions">
+                            <div class="btn-group btn-group-sm" role="group">
+                    `;
+                    
+                    if (ordine.stato === 'pending') {
+                        tableHTML += `
+                            <form action="/orders/update" method="post" class="d-inline">
+                                <input type="hidden" name="orderId" value="${ordine.id}">
+                                <input type="hidden" name="stato" value="completed">
+                                <button type="submit" class="btn btn-success">Completa</button>
+                            </form>
+                            <form action="/orders/update" method="post" class="d-inline">
+                                <input type="hidden" name="orderId" value="${ordine.id}">
+                                <input type="hidden" name="stato" value="refused">
+                                <button type="submit" class="btn btn-warning">Rifiuta</button>
+                            </form>
+                        `;
+                    }
+                    
+                    tableHTML += `
+                            <button type="button" class="btn btn-danger delete-order" data-id="${ordine.id}">Elimina</button>
+                            </div>
+                        </td>
+                    `;
+                }
+                
+                tableHTML += `</tr>`;
+            });
+
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+            
+            resultsContainer.innerHTML = tableHTML;
+            
+            // Aggiungi event listener ai nuovi bottoni di eliminazione
+            document.querySelectorAll('.delete-order').forEach(button => {
+                button.addEventListener('click', handleDeleteClick);
+            });
+        }
+
+        // Gestione del click sul pulsante di eliminazione
+        function handleDeleteClick(e) {
+            deleteOrderId = e.target.getAttribute('data-id');
+            const deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+            deleteModal.show();
+        }
+
+        // Conferma eliminazione
+        document.getElementById('confirmDelete').addEventListener('click', function() {
+            if (deleteOrderId) {
+                // Effettua la richiesta AJAX per eliminare l'ordine con XMLHttpRequest
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', '/api/orders/delete', true);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4) {
+                        if (xhr.status === 200) {
+                            try {
+                                const data = JSON.parse(xhr.responseText);
+                                // Chiudi il modal
+                                bootstrap.Modal.getInstance(document.getElementById('deleteConfirmModal')).hide();
+                                
+                                // Se l'eliminazione ha avuto successo, aggiorna la tabella
+                                if (data.success) {
+                                    // Rimuovi la riga dalla tabella
+                                    document.querySelector(`tr[data-id="${deleteOrderId}"]`)?.remove();
+                                    
+                                    // Oppure, riesegui la ricerca per aggiornare la tabella
+                                    searchForm.dispatchEvent(new Event('submit'));
+                                }
+                            } catch (error) {
+                                console.error('Errore:', error);
+                                alert('Si è verificato un errore durante l\'elaborazione della risposta.');
+                            }
+                        } else {
+                            console.error('Errore:', xhr.statusText);
+                            alert('Si è verificato un errore durante l\'eliminazione dell\'ordine.');
+                        }
+                    }
+                };
+                
+                xhr.onerror = function() {
+                    console.error('Errore di rete');
+                    alert('Si è verificato un errore di rete durante l\'eliminazione dell\'ordine.');
+                };
+                
+                xhr.send(JSON.stringify({ orderId: deleteOrderId }));
+            }
+        });
+
+        // Esegui la ricerca iniziale all'apertura della pagina
+        searchForm.dispatchEvent(new Event('submit'));
+    });
+</script>

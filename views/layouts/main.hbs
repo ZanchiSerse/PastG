@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 20px;
+        }
+        .container {
+            max-width: 960px;
+        }
+        .header {
+            padding: 20px 0;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #e5e5e5;
+        }
+        .actions {
+            text-align: right;
+        }
+        .table {
+            margin-top: 20px;
+        }
+        .btn-group-sm > .btn {
+            margin-right: 5px;
+        }
+        .pending {
+            background-color: #fff3cd;
+        }
+        .completed {
+            background-color: #d1e7dd;
+        }
+        .refused {
+            background-color: #f8d7da;
+        }
+        .navbar-nav {
+            display: flex;
+            gap: 15px;
+        }
+        .online-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #28a745;
+            margin-right: 5px;
+        }
+        
+        /* User row animation for realtime updates */
+        @keyframes highlightNew {
+            from { background-color: #c8e6c9; }
+            to { background-color: transparent; }
+        }
+        
+        @keyframes highlightRemoved {
+            from { background-color: #ffcdd2; }
+            to { background-color: transparent; }
+        }
+        
+        .new-user-animation {
+            animation: highlightNew 1s ease-out;
+        }
+        
+        .removed-user-animation {
+            animation: highlightRemoved 1s ease-out;
+        }
+        
+        /* Animation for real-time user updates */
+        @keyframes highlightUpdated {
+            from { background-color: #bbdefb; }
+            to { background-color: transparent; }
+        }
+        
+        .updated-user-animation {
+            animation: highlightUpdated 1.5s ease-out;
+        }
+        
+        .user-row td {
+            transition: background-color 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header d-flex justify-content-between align-items-center">
+            <div>
+                <h1>{{title}}</h1>
+                <nav class="navbar navbar-expand-lg navbar-light">
+                    <div class="collapse navbar-collapse" id="navbarNav">
+                        <ul class="navbar-nav">
+                            {{#if isAdmin}}
+                            <li class="nav-item">
+                                <a class="nav-link" href="/admin/dashboard">Dashboard</a>
+                            </li>
+                            {{else}}
+                            <li class="nav-item">
+                                <a class="nav-link" href="/user/dashboard">Dashboard</a>
+                            </li>
+                            {{/if}}
+                            <li class="nav-item">
+                                <a class="nav-link" href="/orders/search">Ricerca Ordini</a>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+            <div>
+                <span class="me-3">
+                    <span class="online-indicator" id="user-status-indicator"></span>
+                    Benvenuto, {{userName}}
+                </span>
+                <form action="/logout" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-outline-danger">Logout</button>
+                </form>
+            </div>
+        </header>
+        
+        {{{body}}}
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // Initialize WebSocket connection for presence tracking
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof io !== 'undefined') {
+                const socket = io();
+                const statusIndicator = document.getElementById('user-status-indicator');
+                
+                // Show connection status
+                socket.on('connect', function() {
+                    statusIndicator.style.backgroundColor = '#28a745'; // green
+                });
+                
+                socket.on('disconnect', function() {
+                    statusIndicator.style.backgroundColor = '#dc3545'; // red
+                });
+                
+                // Send heartbeat every 30 seconds to update activity status
+                setInterval(function() {
+                    if (socket.connected) {
+                        socket.emit('heartbeat');
+                    }
+                }, 30000);
+            }
+        });
+    </script>
+</body>
+</html>

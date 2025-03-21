@@ -1,0 +1,324 @@
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2>Utenti Online</h2>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered" id="online-users-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Nome</th>
+                                <th>Ruolo</th>
+                                <th>Stato</th>
+                                <th>Ultima attività</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="5" class="text-center">Connessione in corso...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2>Gestione Ordini</h2>
+            </div>
+            <div class="card-body">
+                {{#if ordini.length}}
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Utente</th>
+                                <th>Cliente</th>
+                                <th>Descrizione</th>
+                                <th>Stato</th>
+                                <th>Data Creazione</th>
+                                <th>Azioni</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{#each ordini}}
+                            <tr class="{{stato}}">
+                                <td>{{id}}</td>
+                                <td>{{nome_utente}}</td>
+                                <td>{{nomecliente}}</td>
+                                <td>{{descrizione}}</td>
+                                <td>
+                                    {{#if (eq stato "pending")}}
+                                    <span class="badge bg-warning">In attesa</span>
+                                    {{else if (eq stato "completed")}}
+                                    <span class="badge bg-success">Completato</span>
+                                    {{else if (eq stato "refused")}}
+                                    <span class="badge bg-danger">Rifiutato</span>
+                                    {{/if}}
+                                </td>
+                                <td>{{data_creazione}}</td>
+                                <td class="actions">
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        {{#if (eq stato "pending")}}
+                                        <form action="/orders/update" method="post" class="d-inline">
+                                            <input type="hidden" name="orderId" value="{{id}}">
+                                            <input type="hidden" name="stato" value="completed">
+                                            <button type="submit" class="btn btn-success">Completa</button>
+                                        </form>
+                                        <form action="/orders/update" method="post" class="d-inline">
+                                            <input type="hidden" name="orderId" value="{{id}}">
+                                            <input type="hidden" name="stato" value="refused">
+                                            <button type="submit" class="btn btn-warning">Rifiuta</button>
+                                        </form>
+                                        {{/if}}
+                                        <form action="/orders/delete" method="post" class="d-inline">
+                                            <input type="hidden" name="orderId" value="{{id}}">
+                                            <button type="submit" class="btn btn-danger" onclick="return confirm('Sei sicuro di voler eliminare questo ordine?')">Elimina</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {{/each}}
+                        </tbody>
+                    </table>
+                </div>
+                {{else}}
+                <div class="alert alert-info">
+                    Non ci sono ordini da gestire.
+                </div>
+                {{/if}}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Track currently displayed users to detect changes
+        let currentUsers = {};
+        
+        // More explicit connection options to ensure proper WebSocket transport
+        const socket = io({
+            transports: ['websocket', 'polling'], // Try WebSocket first, then polling
+            reconnection: true,
+            reconnectionAttempts: 5,
+            reconnectionDelay: 1000,
+            forceNew: true, // Force a new connection
+            timeout: 5000    // Connection timeout
+        });
+        
+        const onlineUsersTable = document.getElementById('online-users-table').querySelector('tbody');
+        
+        // Debug socket connection with more detail
+        socket.on('connect', function() {
+            console.log('Socket connected successfully, ID:', socket.id);
+            console.log('Transport type:', socket.io.engine.transport.name);
+            
+            // Clear any "connecting" messages
+            if (onlineUsersTable.querySelector('td[colspan="5"]')) {
+                onlineUsersTable.innerHTML = '';
+            }
+            
+            // Immediately request user data after successful connection
+            socket.emit('request-users');
+            
+            // Show connection status in UI
+            const statusRow = document.createElement('tr');
+            statusRow.id = 'connection-status-row';
+            statusRow.innerHTML = '<td colspan="5" class="text-center text-success">Connesso al server in tempo reale</td>';
+            
+            // Only add if not already present
+            if (!document.getElementById('connection-status-row')) {
+                onlineUsersTable.appendChild(statusRow);
+                
+                // Remove after 3 seconds
+                setTimeout(() => {
+                    const row = document.getElementById('connection-status-row');
+                    if (row) row.remove();
+                }, 3000);
+            }
+        });
+        
+        // This event will fire immediately on connection and whenever users connect/disconnect
+        socket.on('online-users', function(users) {
+            console.log('Real-time user update received:', users.length, 'users online');
+            updateUsersTable(users);
+        });
+        
+        // Function to update the users table with animation for changes
+        function updateUsersTable(users) {
+            // Convert users array to map for easier comparison
+            const newUsers = {};
+            users.forEach(user => {
+                newUsers[user.id] = user;
+            });
+            
+            // Find which users are new, updated, or removed
+            const addedUsers = {};
+            const updatedUsers = {};
+            const removedUsers = {};
+            
+            // Find added and updated users
+            users.forEach(user => {
+                if (!currentUsers[user.id]) {
+                    addedUsers[user.id] = user;
+                } else {
+                    // Check if any property changed (especially lastActive)
+                    const current = currentUsers[user.id];
+                    if (current.lastActive !== user.lastActive || 
+                        current.name !== user.name || 
+                        current.role !== user.role) {
+                        updatedUsers[user.id] = user;
+                    }
+                }
+            });
+            
+            // Find removed users
+            Object.keys(currentUsers).forEach(id => {
+                if (!newUsers[id]) {
+                    removedUsers[id] = currentUsers[id];
+                }
+            });
+            
+            // Update our tracking of current users
+            currentUsers = {...newUsers};
+            
+            // Check if we need to update at all
+            const hasChanges = Object.keys(addedUsers).length > 0 || 
+                               Object.keys(updatedUsers).length > 0 || 
+                               Object.keys(removedUsers).length > 0;
+            
+            if (!hasChanges) {
+                console.log('No changes in users list');
+                return;
+            }
+            
+            console.log(`Changes detected: ${Object.keys(addedUsers).length} new, ${Object.keys(updatedUsers).length} updated, ${Object.keys(removedUsers).length} removed`);
+            
+            // Completely rebuild the table to handle all cases
+            onlineUsersTable.innerHTML = '';
+            
+            if (users.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = '<td colspan="5" class="text-center">Nessun utente online</td>';
+                onlineUsersTable.appendChild(row);
+                return;
+            }
+            
+            users.forEach(function(user) {
+                const row = document.createElement('tr');
+                
+                // Apply appropriate animation class based on user status
+                if (addedUsers[user.id]) {
+                    row.className = 'user-row new-user-animation';
+                } else if (updatedUsers[user.id]) {
+                    row.className = 'user-row updated-user-animation';
+                } else {
+                    row.className = 'user-row';
+                }
+                
+                // Set a data attribute for easy row identification
+                row.setAttribute('data-user-id', user.id);
+                
+                const isAdmin = user.role === 'admin';
+                const lastActive = new Date(user.lastActive);
+                const timeDiff = Math.round((new Date() - lastActive) / 1000);
+                let statusBadge;
+                
+                if (timeDiff < 60) {
+                    statusBadge = '<span class="badge bg-success">Online</span>';
+                } else if (timeDiff < 300) {
+                    statusBadge = '<span class="badge bg-warning">Inattivo</span>';
+                } else {
+                    statusBadge = '<span class="badge bg-secondary">Offline</span>';
+                }
+                
+                row.innerHTML = `
+                    <td>${user.id}</td>
+                    <td>${user.name}</td>
+                    <td>${isAdmin ? '<span class="badge bg-primary">Admin</span>' : 'Utente'}</td>
+                    <td>${statusBadge}</td>
+                    <td>${lastActive.toLocaleTimeString()}</td>
+                `;
+                onlineUsersTable.appendChild(row);
+                
+                // Remove animation class after effect completes
+                setTimeout(() => {
+                    row.classList.remove('new-user-animation');
+                    row.classList.remove('updated-user-animation');
+                }, 1000);
+            });
+        }
+        
+        // More aggressive heartbeat - check every 15 seconds instead of 30
+        setInterval(function() {
+            if (socket.connected) {
+                socket.emit('heartbeat');
+                console.log('Heartbeat sent');
+            } else {
+                console.log('Socket disconnected - attempting to reconnect');
+                socket.connect(); // Actively try to reconnect
+            }
+        }, 15000);
+        
+        // More detailed connection error debugging
+        socket.on('disconnect', (reason) => {
+            console.log('Disconnected from server:', reason);
+            
+            // Show disconnection in UI
+            const statusRow = document.createElement('tr');
+            statusRow.innerHTML = '<td colspan="5" class="text-center text-danger">Disconnesso dal server. Riconnessione in corso...</td>';
+            onlineUsersTable.innerHTML = '';
+            onlineUsersTable.appendChild(statusRow);
+        });
+        
+        socket.on('connect_error', (error) => {
+            console.error('Connection error:', error.message);
+        });
+        
+        socket.on('error', (error) => {
+            console.error('Socket error:', error);
+        });
+        
+        // Add auto-update timer to refresh the displayed timestamps every minute
+        // This helps update the status indicators even without server updates
+        setInterval(function() {
+            if (currentUsers && Object.keys(currentUsers).length > 0) {
+                const userRows = onlineUsersTable.querySelectorAll('tr[data-user-id]');
+                userRows.forEach(row => {
+                    const userId = row.getAttribute('data-user-id');
+                    const user = currentUsers[userId];
+                    if (user) {
+                        const lastActiveCell = row.cells[4]; // 5th column is last active
+                        const statusCell = row.cells[3]; // 4th column is status
+                        
+                        const lastActive = new Date(user.lastActive);
+                        const timeDiff = Math.round((new Date() - lastActive) / 1000);
+                        
+                        // Update status badge based on time difference
+                        if (timeDiff < 60) {
+                            statusCell.innerHTML = '<span class="badge bg-success">Online</span>';
+                        } else if (timeDiff < 300) {
+                            statusCell.innerHTML = '<span class="badge bg-warning">Inattivo</span>';
+                        } else {
+                            statusCell.innerHTML = '<span class="badge bg-secondary">Offline</span>';
+                        }
+                        
+                        // Keep time updated
+                        lastActiveCell.textContent = lastActive.toLocaleTimeString();
+                    }
+                });
+            }
+        }, 60000);
+    });
+</script>

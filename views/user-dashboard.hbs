@@ -1,0 +1,73 @@
+<div class="row">
+    <div class="col-md-12">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h2>Crea Nuovo Ordine</h2>
+            </div>
+            <div class="card-body">
+                <form action="/orders/create" method="post">
+                    <div class="mb-3">
+                        <label for="cliente_id" class="form-label">Cliente</label>
+                        <select class="form-select" id="cliente_id" name="cliente_id" required>
+                            <option value="" selected disabled>Seleziona un cliente</option>
+                            {{#each clienti}}
+                            <option value="{{idclienti}}">{{nomecliente}}</option>
+                            {{/each}}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="descrizione" class="form-label">Descrizione Ordine</label>
+                        <textarea class="form-control" id="descrizione" name="descrizione" rows="3" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Crea Ordine</button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-header">
+                <h2>I Tuoi Ordini</h2>
+            </div>
+            <div class="card-body">
+                {{#if ordini.length}}
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Cliente</th>
+                                <th>Descrizione</th>
+                                <th>Stato</th>
+                                <th>Data Creazione</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{#each ordini}}
+                            <tr class="{{stato}}">
+                                <td>{{id}}</td>
+                                <td>{{nomecliente}}</td>
+                                <td>{{descrizione}}</td>
+                                <td>
+                                    {{#if (eq stato "pending")}}
+                                    <span class="badge bg-warning">In attesa</span>
+                                    {{else if (eq stato "completed")}}
+                                    <span class="badge bg-success">Completato</span>
+                                    {{else if (eq stato "refused")}}
+                                    <span class="badge bg-danger">Rifiutato</span>
+                                    {{/if}}
+                                </td>
+                                <td>{{data_creazione}}</td>
+                            </tr>
+                            {{/each}}
+                        </tbody>
+                    </table>
+                </div>
+                {{else}}
+                <div class="alert alert-info">
+                    Non hai ancora creato ordini.
+                </div>
+                {{/if}}
+            </div>
+        </div>
+    </div>
+</div>
