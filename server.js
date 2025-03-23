@@ -171,8 +171,8 @@ passport.deserializeUser((id, done) => {
 
 // Google authentication strategy
 passport.use(new GoogleStrategy({
-    clientID: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_SECRET_ID,
+    clientID: '904869527919-j02ntogp6nvnnol35vl1j40v9viec9i3.apps.googleusercontent.com',
+    clientSecret: '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',
     callbackURL: 'http://localhost:3000/auth/google/callback'
 }, (accessToken, refreshToken, profile, done) => {
     // Check if user exists in database
