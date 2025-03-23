@@ -1318,13 +1318,11 @@ function broadcastOnlineUsers() {
 }
 
 
-server.listen(port, '0.0.0.0', () => {
-  console.log(`Server running on http://0.0.0.0:${port}`);
-});
+
 // Update server startup to use the http server
-//server.listen(port, host, () => {
-  //  console.log(`Server in esecuzione su http://${host}:${port}`);
-//});
+server.listen(port, host, () => {
+    console.log(`Server in esecuzione su http://${host}:${port}`);
+});
 
 // Handle termination signals properly
 process.on('SIGINT', () => {
