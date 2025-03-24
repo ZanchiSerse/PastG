@@ -1,4 +1,3 @@
-require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const app = express();
@@ -16,7 +15,7 @@ const http = require('http');
 const socketIo = require('socket.io');
 
 // Use environment variable to determine which DB to use
-const useMockData = process.env.USE_MOCK_DATA === 'true';
+const useMockData = false === 'true';
 console.log(`Using ${useMockData ? 'mock' : 'real'} database`);
 
 // Import database module based on environment setting
@@ -25,7 +24,7 @@ const db = useMockData ? require('./dbmock') : require('./db');
 // Initialize Brevo API client
 const defaultBrevoClient = SibApiV3Sdk.ApiClient.instance;
 const apiKey = defaultBrevoClient.authentications['api-key'];
-apiKey.apiKey = process.env.BREVO_API_KEY; 
+apiKey.apiKey = "<place your api key here>"; 
 const transactionalEmailsApi = new SibApiV3Sdk.TransactionalEmailsApi();
 
 // Setup Handlebars
@@ -171,8 +170,8 @@ passport.deserializeUser((id, done) => {
 
 // Google authentication strategy
 passport.use(new GoogleStrategy({
-    clientID: '904869527919-j02ntogp6nvnnol35vl1j40v9viec9i3.apps.googleusercontent.com',
-    clientSecret: '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',
+    clientID: "<place your api key here>",
+    clientSecret: "<place your api key here>",
     callbackURL: 'http://localhost:3000/auth/google/callback'
 }, (accessToken, refreshToken, profile, done) => {
     // Check if user exists in database
@@ -203,7 +202,7 @@ passport.use(new GoogleStrategy({
 }));
 
 // Google Client ID verification
-const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const googleClient = new OAuth2Client("<place your api key here>");
 
 // Authentication middleware
 function ensureAuthenticated(req, res, next) {
@@ -796,7 +795,7 @@ app.post('/auth/callback', async (req, res) => {
         
         const ticket = await googleClient.verifyIdToken({
             idToken: credential,
-            audience: process.env.GOOGLE_CLIENT_ID || 'api',
+            audience: "<place your api key here>" || 'api',
         });
         
         const payload = ticket.getPayload();
@@ -1213,7 +1212,7 @@ app.use((req, res) => {
 });
 
 // Start the server
-const host = '127.0.0.1';
+const host = '0.0.0.0';
 const server = http.createServer(app);
 const io = socketIo(server, {
     pingTimeout: 60000, // Longer timeout
@@ -1316,8 +1315,6 @@ function broadcastOnlineUsers() {
     // Cache the list for future connections
     global.cachedUserList = userList;
 }
-
-
 
 // Update server startup to use the http server
 server.listen(port, host, () => {
