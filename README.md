@@ -300,5 +300,5 @@ PastG è un progetto open-source e il tuo contributo è benvenuto! Ecco come puo
 *   Se hai dubbi, chiedi!
 
 Grazie per il tuo interesse a contribuire a PastG! 🙌
-## Diagramma UML 📊
+## Diagramma YUML 📊
 ![alt text](https://yuml.me/pastg/PASTg.svg)
