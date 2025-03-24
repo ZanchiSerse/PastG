@@ -24,7 +24,6 @@ Senza PastG, calcolare quanti prodotti fare è un lavoro manuale ✍️, lungo �
 ## Concorrenti (Competitors) ⚔️
 
 *   Danea Easyfatt (software gestionale *generale*, non solo per pasticcerie)
-*   *Altri software specifici per pasticcerie/panifici* (fai una ricerca per completare questa sezione!)
 *   Fogli Excel, quaderni... (PastG è molto meglio! 😉) 📝❌➡️💻✅
 
 ## Requisiti (Requirements) 📜
@@ -96,11 +95,9 @@ Senza PastG, calcolare quanti prodotti fare è un lavoro manuale ✍️, lungo �
 
 ## Tecnologie Utilizzate (Tech Stack) 💻
 
-*   **Linguaggio:** Python 🐍
-*   **Framework:** Flask 🌶️
-*   **Database:** SQLite (integrato in Python)
-*   **Template Engine:** Jinja2 (integrato in Flask)
-*   **Frontend:** HTML, CSS, Bootstrap (per un layout responsivo)
+*   **Linguaggio:** Javascript 
+*   **Database:** SQLite (integrato in Js)
+*   **Frontend:** Hbs, CSS, Bootstrap (per un layout responsive)
 *   **Containerizzazione:** Docker 🐳, Docker Compose
 
 ## Installazione con Docker (Installation with Docker) 🐳
@@ -196,8 +193,8 @@ Prima di iniziare, assicurati di avere quanto segue:
 
 ```bash
 docker-compose down
-Use code with caution.
-Markdown
+```
+
 Questo comando arresta e rimuove i container, le reti e i volumi. Per rimuovere anche le immagini, usa docker-compose down --rmi all.
 
 Utilizzo (Usage) 📝
