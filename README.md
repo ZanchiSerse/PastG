@@ -197,6 +197,25 @@ docker-compose down
 
 Questo comando arresta e rimuove i container, le reti e i volumi. Per rimuovere anche le immagini, usa docker-compose down --rmi all.
 
+## Credenziali di Accesso (Demo) 🔑
+
+Per provare rapidamente PastG, puoi utilizzare le seguenti credenziali di esempio:
+
+**Utente Amministratore (Admin):**
+
+*   **Email:** `admin@example.com`
+*   **Password:** `admin123`
+
+**Utente Cliente (qualsiasi email):**
+Per provare ad aggiungere un nuovo cliente puoi utilizzare una email a tuo piacimento, questo ti permette di testare meglio l applicazione.
+
+**Importante:**
+
+*   Queste credenziali sono solo per scopi dimostrativi e di test.
+*   In un ambiente di produzione, *non utilizzare mai* password predefinite o facilmente indovinabili.
+*   È consigliabile creare nuovi utenti con password robuste per un utilizzo reale.
+*   Non condividere mai le tue credenziali reali con nessuno.
+
 ## Utilizzo 📝
 
 Ecco come usare PastG:
