@@ -197,35 +197,89 @@ docker-compose down
 
 Questo comando arresta e rimuove i container, le reti e i volumi. Per rimuovere anche le immagini, usa docker-compose down --rmi all.
 
-Utilizzo (Usage) 📝
-Registrazione: Clicca su "Registrati" e crea un nuovo account.
+## Utilizzo 📝
 
-Login: Accedi con le tue credenziali.
+Ecco come usare PastG:
 
-Gestione Clienti: Aggiungi, modifica, visualizza ed elimina clienti.
+1.  **Registrazione/Login:**
+    *   Se è la prima volta, clicca su "Registrati" 📝 nella pagina principale e crea un nuovo account.
+    *   Se hai già un account, clicca su "Login" 🔑 e inserisci email e password o fai login con Google.
 
-Gestione Prodotti: Aggiungi, modifica, visualizza ed elimina i prodotti (brioches, ecc.).
+2.  **Gestione Clienti (👤):**
+    *   **Visualizza/Modifica/Elimina:** Nella lista clienti, puoi vedere i dettagli, modificare le informazioni.
 
-Gestione Ordini: Crea nuovi ordini, seleziona il cliente e i prodotti, e le relative quantità. Visualizza, modifica ed elimina gli ordini esistenti.
+3.  **Gestione Prodotti (🥐🍩🍪):**
+    *   **Aggiungi un prodotto:** Vai alla sezione "Prodotti" e clicca su "Aggiungi Prodotto". Inserisci nome e descrizione.
+    *    **Visualizza/Modifica/Elimina:** Nella lista prodotti, puoi vedere i dettagli, modificare le informazioni o eliminare un prodotto.
 
-Visualizza Report: Visualizza la quantita totale di prodotti da fare.
+4.  **Gestione Ordini (📝📦):**
+    *   **Crea un nuovo ordine:** Vai alla sezione "Ordini" e clicca su "Nuovo Ordine".
+        *   Seleziona il cliente dall'elenco a discesa.
+        *   Aggiungi i prodotti e le quantità desiderate.
+        *   Clicca su "Salva Ordine".
+    *   **Visualizza/Modifica/Elimina:** Nella lista ordini, puoi vedere i dettagli di un ordine, modificarlo (aggiungere/rimuovere prodotti, cambiare quantità) o eliminarlo.
 
-Contribuire (Contributing) 🤝
-Al momento, il progetto è gestito principalmente da un singolo sviluppatore. Se sei interessato a contribuire, puoi:
+**Suggerimenti:**
 
-Segnalare bug: Apri una "Issue" su GitHub per segnalare problemi o errori. 🐛
+*   L'interfaccia è intuitiva e progettata per essere facile da usare. 👍
+*   Tutti i dati inseriti vengono salvati automaticamente. ✅
+*   Usa il pulsante "Logout" per uscire dall'applicazione in modo sicuro. 🚪
 
-Proporre nuove idee: Apri una "Issue" per suggerire nuove funzionalità o miglioramenti. ✨
+## Contribuire (Contributing) 🤝
 
-Fork & Pull Request: Se vuoi contribuire direttamente al codice:
+PastG è un progetto open-source e il tuo contributo è benvenuto! Ecco come puoi aiutare:
 
-Fai un "fork" del repository.
+1.  **Segnalare Bug (🐛):**
+    *   Se trovi un errore o un comportamento inaspettato, apri una *Issue* su GitHub.
+    *   Sii il più dettagliato possibile:
+        *   Descrivi cosa stavi facendo quando si è verificato il problema.
+        *   Includi i passaggi per riprodurre il bug.
+        *   Specifica il tuo sistema operativo, browser e versione di Python (se rilevante).
+        *   Allega screenshot o messaggi di errore, se possibile.
 
-Crea un nuovo branch per le tue modifiche.
+2.  **Proporre Nuove Funzionalità (✨):**
+    *   Hai un'idea per migliorare PastG? Apri una *Issue* su GitHub e descrivi la tua proposta.
+    *   Spiega chiaramente i vantaggi della nuova funzionalità.
+    *   Se possibile, fornisci esempi di come dovrebbe funzionare.
 
-Invia una "Pull Request" quando le tue modifiche sono pronte. 📝
+3.  **Contribuire al Codice (📝 - Fork & Pull Request):**
 
-Licenza (License) 📄
-Questo progetto è rilasciato sotto licenza MIT - vedi il file LICENSE per i dettagli.
+    Questo è il modo più diretto per contribuire al progetto.  Ecco i passaggi:
 
+    *   **Fork:** Clicca sul pulsante "Fork" in alto a destra nella pagina del repository GitHub di PastG ([https://github.com/ZanchiSerse/PastG](https://github.com/ZanchiSerse/PastG)).  Questo creerà una copia del progetto nel tuo account GitHub.
+    *   **Clone:** Clona il tuo fork sul tuo computer:
+        ```bash
+        git clone https://github.com/TUO_USERNAME/PastG.git  # Sostituisci TUO_USERNAME
+        cd PastG
+        ```
+    *   **Crea un Branch:** Crea un nuovo branch per le tue modifiche (usa un nome descrittivo, es. `fix-bug-registrazione` o `feature-nuovo-report`):
+        ```bash
+        git checkout -b nome-del-tuo-branch
+        ```
+    *   **Apporta le Modifiche:** Modifica il codice, aggiungi nuove funzionalità, correggi bug, ecc.
+    *   **Test:** Assicurati che le tue modifiche funzionino correttamente e non introducano nuovi problemi. *Aggiungere test unitari è molto apprezzato!*
+    *   **Commit:**  Salva le tue modifiche con commit significativi:
+        ```bash
+        git add .
+        git commit -m "Descrivi brevemente le tue modifiche"
+        ```
+    *   **Push:**  Invia le modifiche al tuo fork su GitHub:
+        ```bash
+        git push origin nome-del-tuo-branch
+        ```
+    *   **Pull Request:**  Vai alla pagina del tuo fork su GitHub.  Dovresti vedere un pulsante per creare una "Pull Request".  Cliccalo, compila il modulo (descrivendo le tue modifiche) e invia la richiesta.
+
+4.  **Migliorare la Documentazione (📖):**
+
+     Anche migliorare la documentazione (come questo README!) è un contributo prezioso.  Puoi seguire lo stesso processo di Fork & Pull Request per apportare modifiche.
+
+**Linee Guida:**
+
+*   Segui lo stile del codice esistente.
+*   Scrivi commit chiari e concisi.
+*   Sii rispettoso e collaborativo nelle discussioni.
+*   Se hai dubbi, chiedi!
+
+Grazie per il tuo interesse a contribuire a PastG! 🙌
 Diagramma UML 📊
+![alt text](https://yuml.me/pastg/PASTg.svg)
