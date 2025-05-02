@@ -3,7 +3,7 @@
 [![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/ZanchiSerse/PastG/actions)  <!-- GitHub Actions build status (if you set it up) -->
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-PastG è un'applicazione web 💻 creata appositamente per pasticcerie 🏭, fornai 🥖 e laboratori artigianali 🍩. Ti aiuta a gestire gli ordini dei clienti 🛍️ e a calcolare in un attimo quante brioches 🥐 e altri dolci 🍪 devi preparare. È costruita con Hbs, Javascript e può essere eseguita facilmente con Docker e Docker Compose.
+PastG è un'applicazione web creata appositamente per pasticcerie, fornai e laboratori artigianali. Ti aiuta a gestire gli ordini dei clienti e a calcolare in un attimo quante brioches e altri dolci devi preparare. È costruita con Hbs, Javascript e può essere eseguita facilmente con Docker e Docker Compose.
 
 ## A chi è rivolto? (Target) 🎯
 
