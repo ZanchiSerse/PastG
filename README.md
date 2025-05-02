@@ -7,61 +7,61 @@ PastG è un'applicazione web 💻 creata appositamente per pasticcerie 🏭, for
 
 ## A chi è rivolto? (Target) 🎯
 
-*   Pasticcerie 🎂🍰
-*   Artigiani del settore dolciario 🍩🍪
-*   Fornai 🥖🍞
-*   Piccoli laboratori di produzione 🏭
+*   Pasticcerie 
+*   Artigiani del settore dolciario
+*   Fornai 
+*   Piccoli laboratori di produzione 
 
 ## Che problema risolve? 🤔
 
-Senza PastG, calcolare quanti prodotti fare è un lavoro manuale ✍️, lungo ⏳ e pieno di possibili errori ❌. PastG fa tutto in automatico 🤖: più efficienza ✅, meno sbagli 💯 e più tempo per te 💪!
+Senza PastG, calcolare quanti prodotti fare è un lavoro manuale , lungo e pieno di possibili errori. PastG fa tutto in automatico: più efficienza ✅, meno sbagli 💯 e più tempo per te 💪!
 
-*   **Meno errori:** Addio ai calcoli sbagliati! 🧮❌➡️🤖✅
-*   **Più tempo:** Calcoli automatici, più tempo per creare dolci! ⏳➡️🍰
-*   **Ordini sotto controllo:** Tutto in un unico posto, facile da gestire! 📝➡️💻
-*   **Niente sprechi:** Produci solo quello che serve! 🗑️➡️🌱
+*   **Meno errori:** Addio ai calcoli sbagliati! 
+*   **Più tempo:** Calcoli automatici, più tempo per creare dolci! 
+*   **Ordini sotto controllo:** Tutto in un unico posto, facile da gestire! 
+*   **Niente sprechi:** Produci solo quello che serve! 
 
 ## Concorrenti (Competitors) ⚔️
 
 *   Danea Easyfatt (software gestionale *generale*, non solo per pasticcerie)
-*   Fogli Excel, quaderni... (PastG è molto meglio! 😉) 📝❌➡️💻✅
-
+*   Fogli Excel, quaderni... (PastG è molto meglio! 😉)
+  
 ## Requisiti (Requirements) 📜
 
 ### Requisiti di Dominio (Cosa deve fare il sistema nel suo contesto) 🌍
 
-*   **Gestione Ordini:** Gestire gli ordini dei clienti (quantità e tipo di dolci). 📝
-*   **Calcolo Produzione:** Calcolare quanti dolci fare in totale. ➕
-*   **Gestione Clienti:** Salvare e gestire i dati dei clienti. 👤
-*   **Catalogo Prodotti:** Avere una lista dei dolci disponibili. 🍩🍪
+*   **Gestione Ordini:** Gestire gli ordini dei clienti (quantità e tipo di dolci). 
+*   **Calcolo Produzione:** Calcolare quanti dolci fare in totale. 
+*   **Gestione Clienti:** Salvare e gestire i dati dei clienti. 
+*   **Catalogo Prodotti:** Avere una lista dei dolci disponibili. 
 
 ### Requisiti Funzionali (Cosa deve fare il software) ⚙️
 
 1.  **Gestione Utenti (User Management):** 👤
-    *   1.1 **Registrazione Utente:** I pasticceri 👨‍🍳 si registrano (nome, email, password, ecc.). 📝
-    *   1.2 **Login:** Accesso con email e password. 🔑
-    *   1.3 **Profilo:** Modificare le proprie informazioni. ✏️
+    *   1.1 **Registrazione Utente:** I pasticceri si registrano (nome, email, password, ecc.).
+    *   1.2 **Login:** Accesso con email e password.
+    *   1.3 **Profilo:** Modificare le proprie informazioni. 
 
 2.  **Gestione Clienti (Customer Management):** 👥
-    *   2.1 **Nuovo Cliente:** Aggiungere un cliente (nome, indirizzo, telefono...). ➕👤
-    *   2.2 **Lista Clienti:** Vedere tutti i clienti. 👁️👥
-    *   2.3 **Modifica Cliente:** Cambiare i dati di un cliente. ✏️👤
-    *   2.4 **Elimina Cliente:** Cancellare un cliente (con conferma!). 🗑️👤
-    *   2.5 **Cerca Cliente:** Trovare un cliente per nome. 🔍👤
+    *   2.1 **Nuovo Cliente:** Aggiungere un cliente (nome, indirizzo, telefono...). 
+    *   2.2 **Lista Clienti:** Vedere tutti i clienti. 
+    *   2.3 **Modifica Cliente:** Cambiare i dati di un cliente. 
+    *   2.4 **Elimina Cliente:** Cancellare un cliente (con conferma!). 
+    *   2.5 **Cerca Cliente:** Trovare un cliente per nome. 
 
 3.  **Gestione Prodotti (Product Management):** 🥐🍩🍪
-    *   3.1 **Nuovo Prodotto:** Aggiungere un dolce al catalogo. ➕🥐
-    *   3.2 **Lista Prodotti:** Vedere tutti i dolci. 👁️🥐🍩🍪
-    *   3.3 **Modifica Prodotto:** Cambiare i dati di un dolce. ✏️🥐
-    *   3.4 **Elimina Prodotto:** Cancellare un dolce. 🗑️🥐
+    *   3.1 **Nuovo Prodotto:** Aggiungere un dolce al catalogo. 
+    *   3.2 **Lista Prodotti:** Vedere tutti i dolci. 
+    *   3.3 **Modifica Prodotto:** Cambiare i dati di un dolce. 
+    *   3.4 **Elimina Prodotto:** Cancellare un dolce. 
 
 4.  **Gestione Ordini (Order Management):** 📝📦
-    *   4.1 **Nuovo Ordine:** Creare un ordine per un cliente (scegli i dolci e le quantità). ➕📝
-    *   4.2 **Lista Ordini:** Vedere tutti gli ordini. 👁️📝
-    *   4.3 **Modifica Ordine:** Cambiare un ordine. ✏️📝
-    *   4.4 **Elimina Ordine:** Cancellare un ordine (con conferma!). 🗑️📝
-    *   4.5 **Calcolo Totale Ordine:** Il software calcola in automatico il totale. 🧮📝
-    *  4.6 **Calcolo Totale Produzione:** Il software calcola il totale di prodotti da produrre sommando tutti gli ordini. ➕📝
+    *   4.1 **Nuovo Ordine:** Creare un ordine per un cliente (scegli i dolci e le quantità). 
+    *   4.2 **Lista Ordini:** Vedere tutti gli ordini. 
+    *   4.3 **Modifica Ordine:** Cambiare un ordine. 
+    *   4.4 **Elimina Ordine:** Cancellare un ordine (con conferma!). 
+    *   4.5 **Calcolo Totale Ordine:** Il software calcola in automatico il totale. 
+    *  4.6 **Calcolo Totale Produzione:** Il software calcola il totale di prodotti da produrre sommando tutti gli ordini. 
 
 5.  **Reportistica (Reporting):** 📊📈
     *   5.1 Vedere quanti dolci di ogni tipo fare
@@ -69,8 +69,8 @@ Senza PastG, calcolare quanti prodotti fare è un lavoro manuale ✍️, lungo �
 ### Requisiti Non Funzionali (Come deve funzionare il software) ✨
 
 1.  **Usabilità (Usability):** 👍
-    *   Facile da usare e da capire. 👌
-    *   Tutto deve essere logico e veloce. ⚡➡️
+    *   Facile da usare e da capire. 
+    *   Tutto deve essere logico e veloce. 
     *   Pochi passaggi per fare le cose.
 
 2.  **Prestazioni (Performance):** 🚀
