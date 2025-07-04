@@ -1,4 +1,15 @@
 <div class="row">
+    <style>
+        .customer-link {
+            color: #0066cc;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .customer-link:hover {
+            color: #004080;
+            text-decoration: underline;
+        }
+    </style>
     <div class="col-md-12">
         <div class="card mb-4">
             <div class="card-header">
@@ -70,7 +81,7 @@
                                 {{#if ../isAdmin}}
                                 <td>{{nome_utente}}</td>
                                 {{/if}}
-                                <td>{{nomecliente}}</td>
+                                <td><span class="customer-link" onclick="mostrareProdotti('{{nomecliente}}')">{{nomecliente}}</span></td>
                                 <td>{{descrizione}}</td>
                                 <td>
                                     {{#if (eq stato "pending")}}
@@ -130,6 +141,145 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Modal per visualizzazione prodotti -->
+                <div class="modal fade" id="productsModal" tabindex="-1">
+                    <div class="modal-dialog modal-xl">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Prodotti Cliente: <span id="clienteNomeModal"></span></h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <!-- Tabella dei prodotti -->
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th colspan="6">LUNEDÌ - VENERDÌ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="fw-bold">SFOGLIATE</td>
+                                            <td>CREMA</td>
+                                            <td>MARME</td>
+                                            <td>VUOTE</td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">KRAPFEN</td>
+                                            <td>MARME</td>
+                                            <td>CREMA</td>
+                                            <td>NUTELLA</td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">BABY</td>
+                                            <td>CREMA</td>
+                                            <td>VUOTE</td>
+                                            <td>MARME</td>
+                                            <td>CIOCCO</td>
+                                            <td>TRECCE</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">FRANCESI</td>
+                                            <td>CREMA</td>
+                                            <td>MARME</td>
+                                            <td>VUOTE</td>
+                                            <td>LAMPONE</td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td>NUTELLA</td>
+                                            <td>BIANCO</td>
+                                            <td>NOCI</td>
+                                            <td>PISTACCHIO</td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td>CARAMELLO</td>
+                                            <td>FRAGOLA</td>
+                                            <td>FONDENTE</td>
+                                            <td>MANDORLA</td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">NORMALI</td>
+                                            <td>CIOCCO</td>
+                                            <td>NUTELLA</td>
+                                            <td>INTEGRALI</td>
+                                            <td>INTE LAMP</td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td>VENE</td>
+                                            <td>GIRELLE</td>
+                                            <td>BIANCO</td>
+                                            <td>PISTACCHIO</td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td>NOCI</td>
+                                            <td>BOSCO</td>
+                                            <td>TRECCE</td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">SFOGLIE</td>
+                                            <td>CREMA</td>
+                                            <td>MARME</td>
+                                            <td>VUOTE</td>
+                                            <td>CIOCCO</td>
+                                            <td>LAMPONE</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">NASTRINE</td>
+                                            <td>PERE</td>
+                                            <td>MELE</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">SPECIALI</td>
+                                            <td>VEG VUOTE</td>
+                                            <td>VEG MARME</td>
+                                            <td>SALATE</td>
+                                            <td>BABY SALATE</td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td></td>
+                                            <td>CANAPA</td>
+                                            <td>ZENZERO</td>
+                                            <td>MORA</td>
+                                            <td>ARANCIA</td>
+                                            <td>CURCUMA</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="fw-bold">FRESCO</td>
+                                            <td>LAMPONE</td>
+                                            <td>AMARENA</td>
+                                            <td></td>
+                                            <td></td>
+                                            <td></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Chiudi</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -143,6 +293,30 @@
         const loadingIndicator = document.getElementById('loading');
         let deleteOrderId = null;
         const isAdmin = {{isAdmin}} ? true : false;
+        
+        // Funzione per mostrare i prodotti - definita nel contesto globale
+        window.mostrareProdotti = function(nomeCliente) {
+            try {
+                // Impostiamo il nome del cliente nel modal
+                document.getElementById('clienteNomeModal').innerText = nomeCliente;
+                
+                // Verifichiamo se Bootstrap è disponibile
+                if (typeof bootstrap === 'undefined') {
+                    console.error("Bootstrap non è definito!");
+                    alert("Errore: Bootstrap non è caricato correttamente.");
+                    return;
+                }
+                
+                // Tentiamo di aprire il modal
+                const modal = new bootstrap.Modal(document.getElementById('productsModal'));
+                modal.show();
+                
+                console.log("Modal mostrato con successo per cliente: " + nomeCliente);
+            } catch (error) {
+                console.error("Errore nell'aprire il modal:", error);
+                alert("Errore nell'aprire il modal: " + error.message);
+            }
+        };
 
         // Gestione del submit del form con AJAX
         searchForm.addEventListener('submit', function(e) {
@@ -252,7 +426,7 @@
                     <tr class="${ordine.stato}">
                         <td>${ordine.id}</td>
                         ${isAdmin ? `<td>${ordine.nome_utente || ''}</td>` : ''}
-                        <td>${ordine.nomecliente}</td>
+                        <td><span class="customer-link" onclick="mostrareProdotti('${ordine.nomecliente}')">${ordine.nomecliente}</span></td>
                         <td>${ordine.descrizione}</td>
                         <td>${statoText}</td>
                         <td>${ordine.data_creazione}</td>
@@ -355,5 +529,12 @@
 
         // Esegui la ricerca iniziale all'apertura della pagina
         searchForm.dispatchEvent(new Event('submit'));
+        
+        // Test di Bootstrap all'avvio
+        try {
+            console.log("Bootstrap disponibile:", typeof bootstrap !== 'undefined');
+        } catch(e) {
+            console.error("Errore nel test di Bootstrap:", e);
+        }
     });
 </script>

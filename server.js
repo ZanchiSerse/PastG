@@ -250,7 +250,64 @@ app.get('/login', (req, res) => {
     
     res.render('login', { title: 'Accedi' });
 });
+// Aggiungi questo middleware per verificare se l'utente è amministratore
+const isAdmin = (req, res, next) => {
+  if (req.session && req.session.user && req.session.user.isAdmin) {
+    return next();
+  }
+  // Se non è admin, reindirizza alla pagina di login o mostra un errore
+  res.status(403).render('error', { 
+    message: 'Accesso negato. Solo gli amministratori possono visualizzare questa pagina.',
+    layout: 'main'
+  });
+};
 
+app.get('/customer-details/:id', isAdmin, async (req, res) => {
+  try {
+    const clientId = req.params.id;
+    
+    // Recupera i dati del cliente dal database
+    const client = await db.getClient(clientId);
+    
+    if (!client) {
+      return res.status(404).render('error', {
+        message: 'Cliente non trovato',
+        layout: 'admin-dashboard',
+        isAdmin: true
+      });
+    }
+    
+    // Qui costruiamo manualmente la tabella dei prodotti come nell'immagine
+    // In un'implementazione reale, questi dati verrebbero dal database
+    const productTable = {
+      categories: [
+        { name: "SFOGLIATE", products: ["CREMA", "MARME", "VUOTE"] },
+        { name: "KRAPFEN", products: ["MARME", "CREMA", "NUTELLA"] },
+        { name: "BABY", products: ["CREMA", "VUOTE", "MARME", "CIOCCO", "TRECCE"] },
+        { name: "FRANCESI", products: ["CREMA", "MARME", "VUOTE", "LAMPONE"] },
+        { name: "NORMALI", products: ["CIOCCO", "NUTELLA", "INTEGRALI", "INTE LAMP"] },
+        { name: "SFOGLIE", products: ["CREMA", "MARME", "VUOTE", "CIOCCO", "LAMPONE"] },
+        { name: "NASTRINE", products: ["PERE", "MELE"] },
+        { name: "SPECIALI", products: ["VEG VUOTE", "VEG MARME", "SALATE", "BABY SALATE"] },
+        { name: "FRESCO", products: ["LAMPONE", "AMARENA"] }
+      ]
+    };
+    
+    res.render('customer-products', {
+      client: client,
+      productTable: productTable,
+      layout: 'admin-dashboard',
+      isAdmin: true
+    });
+  } catch (error) {
+    console.error('Errore nel recuperare i dettagli del cliente:', error);
+    res.status(500).render('error', {
+      message: 'Errore nel recuperare i dettagli del cliente',
+      layout: 'admin-dashboard',
+      isAdmin: true
+    });
+  }
+});
 // User dashboard
 app.get('/user/dashboard', ensureAuthenticated, async (req, res) => {
     try {

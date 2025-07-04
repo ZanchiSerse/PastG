@@ -1,0 +1,25 @@
+<div class="container mt-4">
+  <h2>Dettagli prodotti per cliente: {{client.nomecliente}}</h2>
+  
+  <table class="table table-bordered">
+    <thead>
+      <tr>
+        <th colspan="6">LUNEDÌ - VENERDÌ</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each productTable.categories}}
+        <tr>
+          <td class="fw-bold">{{name}}</td>
+          {{#each products}}
+            <td>{{this}}</td>
+          {{/each}}
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+  
+  <div class="mt-3">
+    <a href="/search-orders" class="btn btn-primary">Torna agli ordini</a>
+  </div>
+</div>
